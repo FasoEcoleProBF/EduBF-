@@ -787,8 +787,8 @@ function rsaSign(nHex,dHex,payloadBytes){
   return bigToBytes(modPow(m,d,n),k);
 }
 
-var LIC_N='b6ebb384fca4e558426b68258c4591e2092f15cd3ef0463c82fb5ed44fe365bb28484fb31562c025075f9b022471c2c5729a22e82644ebfe35f35e238e2de91ce758e018207bf47ca6f278b9fb36ef50e26d03f27ac942acce135024052e9a3070e9b4ee0969cd22026fea698553bf4b0eedc9e216512c849560b4e505ec1ca97b7897b08310016e1899db272a2f4548deabfb2169e96854096b2fd5c4b6c0962954fadc95e74b090436e38e564eab778ce26297327431821175de1651bdee3be185a043c821183dbd2155a733c7d8ff58fe3ed19d95f7ad72eca9b254792791813617b3b1f0c4c7dc335c47f15b8be8db66298a07ed227c109c17965e79c2c1';
-var LIC_KEYID='4FFE-EED4';  // empreinte de la clé : identique dans l'application et dans son générateur
+var LIC_N='f81be438bbe9306f9b5baf14cb6728b9bdf3789c1f111b048c77f9e281fb39992b6510d9cfb6835a91c5ec26b27458d1491b6932ce485bf69020e0264a2d3ad16c694a55520a3a38b21de6301bb320ca20cfc324d524a95d483986540fd647758faf89f0f80e10fc1588c5bdfa34c8c3861500ce8f6097e71e035daa69590759b37b1a9a71bc3888cfc9ebac7c2406b8a22d4a0b6044750a49941e98ba2800c52f59f31c53fe7a72ef7fa6ce0bfc1b7f728b42209a9ed5470e3aa23363ec18e0973d0d4d4c45d6215517559097d5801ea139326e52cc9021a8bfff718f9ab82e56224ba2ffc4b7c8ce53c2d0813b826421f2e169f41b949ed877163f19db3029';
+var LIC_KEYID='F1E2-0D4C';  // empreinte de la clé : identique dans l'application et dans son générateur
 var LIC_EXCL=['deviceId','licenceSigned','lastSeenTs','activationInfo','licenceConfig'];
 var LIC=null;      // charge utile de la licence valide
 var IDENT={};      // informations verrouillées par l'administrateur : nom (établissement), dir, ens, ceb
