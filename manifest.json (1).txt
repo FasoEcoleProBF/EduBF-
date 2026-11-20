@@ -1,0 +1,22 @@
+{
+  "name": "EduBF v2",
+  "short_name": "EduBF v2",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a5c36",
+  "theme_color": "#0a5c36",
+  "icons": [
+    {
+      "src": "icon-e-vert.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-e-vert.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
