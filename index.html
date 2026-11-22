@@ -334,8 +334,8 @@ function edubfDemander(){
     <div class="fg"><label>Champ disciplinaire - Touche un bouton</label><div class="btns" id="fp2-champBtns"></div></div>
     <div class="fg"><label>Discipline - Touche un bouton</label><div class="btns" id="fp2-discBtns"></div></div>
     <div class="fg"><label>Matière - Touche un bouton</label><div class="btns" id="fp2-matBtns"></div></div>
-    <div class="fg"><label>Thème</label><input id="fp2-theme" value="Les déterminants du nom"></div>
-    <div class="fg"><label>Titre</label><input id="fp2-titre" value="L'article"></div>
+    <div class="fg"><label>Thème</label><input id="fp2-theme" placeholder="Ex : Les déterminants du nom"></div>
+    <div class="fg"><label>Titre</label><input id="fp2-titre" placeholder="Ex : L'article"></div>
     <div class="fg"><label>Durée - Touche un bouton</label><div class="btns" id="fp2-dureeBtns"></div></div>
   </div>
   <div class="card"><div id="fp2-out"></div></div>
@@ -347,25 +347,97 @@ var FP2_sel={classe:'CM2',champ:'Langue et communication',disc:'Français',mat:'
 function FP2_renderBtns(elId,items,field,cb){var el=document.getElementById(elId);if(!el)return;el.innerHTML='';items.forEach(function(v){var b=document.createElement('button');b.type='button';var isSel=(FP2_sel[field]===v);b.textContent=(isSel?'✓ ':'')+v;if(isSel){b.className='sel';b.style.background='#0a6b2e';b.style.color='#fff';b.style.borderColor='#0a6b2e';}else{b.style.background='#eee';b.style.color='#111';b.style.borderColor='#333';}b.onclick=function(){FP2_sel[field]=v;if(cb)cb(v);FP2_renderAll();FP2_generer();};el.appendChild(b);});}
 function FP2_renderAll(){FP2_renderBtns('fp2-classeBtns',['CP1','CP2','CE1','CE2','CM1','CM2'],'classe');FP2_renderBtns('fp2-champBtns',Object.keys(FP2_DATA),'champ',function(){FP2_sel.disc=Object.keys(FP2_DATA[FP2_sel.champ])[0];FP2_sel.mat=FP2_DATA[FP2_sel.champ][FP2_sel.disc][0];});var discs=FP2_sel.champ?Object.keys(FP2_DATA[FP2_sel.champ]):[];FP2_renderBtns('fp2-discBtns',discs,'disc',function(){FP2_sel.mat=FP2_DATA[FP2_sel.champ][FP2_sel.disc][0];});var mats=(FP2_sel.champ&&FP2_sel.disc)?FP2_DATA[FP2_sel.champ][FP2_sel.disc]:[];FP2_renderBtns('fp2-matBtns',mats,'mat');FP2_renderBtns('fp2-dureeBtns',['30','45','60'],'duree');}
 function FP2_matTxt(m,t){t=(t||'').toLowerCase();if(t.indexOf('article')>=0)return "Tableau, craie, ardoises, phrases au tableau avec articles à souligner, tableau des articles définis (le, la, les, l') et indéfinis (un, une, des), manuel de français.";if(m==='Grammaire')return "Tableau, craie, ardoises, phrases modèles, tableau de la notion, manuel de français.";if(m==='Lecture')return "Tableau, craie, ardoises, texte de lecture, images d'appui.";if(m==='Calcul'||m==='Arithmétique')return "Tableau, craie, ardoises, objets à compter, matériel de numération, manuel de mathématiques.";if(m==="Science d'observation")return "Objets réels du milieu, images, tableau, craie, ardoises, matériel d'observation.";if(m==='Géographie')return "Carte du Burkina Faso, carte de la localité, tableau, craie, ardoises, manuel.";if(m==='Histoire')return "Images, frise chronologique, tableau, craie, ardoises, manuel.";if(m==='Dessin')return "Cahiers de dessin, crayons, gomme, règle, modèles, tableau, craie.";return "Tableau, craie, ardoises, manuel de la classe et supports adaptés à "+t+".";}
-function FP2_generer(){var g=parseInt(document.getElementById('fp2-garc').value||0),f=parseInt(document.getElementById('fp2-fill').value||0);var D=parseInt(FP2_sel.duree||30),pres,dev,ev;if(D===30){pres=5;dev=19;ev=6}else if(D===45){pres=8;dev=28;ev=9}else{pres=10;dev=38;ev=12}var m=FP2_sel.mat||'',d=FP2_sel.disc||'',ch=FP2_sel.champ||'';var isMaths=(ch.indexOf('Mathématiques')>=0 && (d==='Mathématiques' || ['Arithmétique','Calcul','Calcul mental','Géométrie','Système métrique','Mathématiques'].indexOf(m)>=0));var type=isMaths?'maths':(ch==='Langue et communication'?'francais':(ch==='Sciences humaines et sociales'?'shs':(ch.indexOf('EPS')>=0?'eps':(m.indexOf('observation')>=0||m.indexOf('Observation')>=0?'observation':'general'))));var titre=document.getElementById('fp2-titre').value||'___';var dv=document.getElementById('fp2-date').value||'';var dt=dv?new Date(dv+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'___';var calc=function(a){return Math.max(1,Math.round(a*D/30));};var presHTML='';if(type==='maths'){presHTML='Calcul mental '+calc(2)+' min<br>Rappel '+calc(2)+' min<br>Motivation '+calc(1)+' min';}else if(type==='francais'){presHTML='Rappel '+calc(2)+' min<br>Motivation '+calc(1)+' min<br>Présentation du texte / situation '+calc(2)+' min';}else if(type==='shs'){presHTML='Rappel '+calc(2)+' min<br>Motivation '+calc(1)+' min<br>Observation (carte / image) '+calc(2)+' min';}else if(type==='eps'){presHTML='Mise en train '+calc(2)+' min<br>Rappel '+calc(1)+' min<br>Motivation '+calc(2)+' min';}else if(type==='observation'){presHTML='Rappel '+calc(2)+' min<br>Motivation '+calc(1)+' min<br>Observation du réel '+calc(2)+' min';}else{presHTML='Rappel '+calc(2)+' min<br>Motivation '+calc(1)+' min<br>Présentation de la situation '+calc(2)+' min';}var out=document.getElementById('fp2-out');if(!out)return;out.innerHTML='<h3 style="text-align:center">'+(document.getElementById('fp2-ecole').value||'ÉCOLE')+'</h3><p style="text-align:center">CEB : '+(document.getElementById('fp2-ceb').value||'___')+'<br><b>FICHE DE PRÉPARATION API</b><br><b>'+titre+'</b></p><p><b>Date :</b> '+dt+' | <b>Durée :</b> '+D+' min | <b>Classe :</b> '+FP2_sel.classe+'<br><b>Effectif :</b> '+(g+f)+' élèves — Garçons : '+g+' ; Filles : '+f+'<br><b>Champ :</b> '+ch+'<br><b>Discipline :</b> '+d+'<br><b>Matière :</b> '+m+'<br><b>Thème :</b> '+document.getElementById('fp2-theme').value+'</p><p><b>Objectifs :</b> Identifier les données utiles et la question posée dans une situation liée à « '+titre+' ».</p><p><b>Matériel :</b> '+FP2_matTxt(m,titre)+'</p><p><b>Documents :</b> Guide de l\'enseignant API, Manuel de la classe, Curricula API.</p><table style="width:100%;border-collapse:collapse;font-size:13px"><tr><th style="border:1px solid #111;padding:5px">Étape</th><th style="border:1px solid #111;padding:5px">Activité / durée</th><th style="border:1px solid #111;padding:5px">Enseignant</th><th style="border:1px solid #111;padding:5px">Apprenants</th></tr><tr><td style="border:1px solid #111;padding:5px"><b>PRÉSENTATION<br>'+pres+' min</b></td><td style="border:1px solid #111;padding:5px">'+presHTML+'</td><td style="border:1px solid #111;padding:5px">Fait rappeler, motive, présente.</td><td style="border:1px solid #111;padding:5px">Répondent, observent.</td></tr><tr><td style="border:1px solid #111;padding:5px"><b>DÉVELOPPEMENT<br>'+dev+' min</b></td><td style="border:1px solid #111;padding:5px">Situation-problème '+calc(4)+' min<br>Consigne 1 : '+calc(4)+' min<br>Consigne 2 : '+calc(3)+' min<br>Consigne 3 : '+calc(3)+' min<br>Synthèse '+calc(5)+' min</td><td style="border:1px solid #111;padding:5px">Présente le problème sur « '+titre+' », guide les groupes.</td><td style="border:1px solid #111;padding:5px">Cherchent, échangent, présentent.</td></tr><tr><td style="border:1px solid #111;padding:5px"><b>ÉVALUATION<br>'+ev+' min</b></td><td style="border:1px solid #111;padding:5px">Évaluation '+calc(5)+' min<br>Défi '+calc(1)+' min<br>Remédiation intégrée<br>Prolongement hors séance</td><td style="border:1px solid #111;padding:5px">Évalue, corrige, donne le devoir.</td><td style="border:1px solid #111;padding:5px">Répondent, corrigent.</td></tr></table><div style="margin-top:16px;display:flex;justify-content:space-between;font-size:14px"><div style="text-align:center;width:45%"><b>Le Maître</b><div style="height:22mm"></div><p style="border-top:1.5px solid #111;padding-top:6px">Signature</p></div><div style="text-align:center;width:45%"><b>Le Directeur</b><div style="height:22mm"></div><p style="border-top:1.5px solid #111;padding-top:6px">Signature et Cachet</p></div></div><div style="text-align:center;margin-top:14px"><button onclick="FP2_imprimer()" style="background:#0a6b2e;color:#fff;border:none;padding:13px 22px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer">🖨️ Imprimer la fiche</button></div>';}
+function FP2_contenu(){
+  var t=(document.getElementById('fp2-titre').value||"").toLowerCase();
+  var th=(document.getElementById('fp2-theme').value||"").toLowerCase();
+  if(t.indexOf("article")>=0||th.indexOf("déterminant")>=0||th.indexOf("determinant")>=0){
+    return {
+      obj:"À la fin de la leçon, l'élève doit être capable d'identifier l'article devant un nom et d'utiliser correctement le, la, les, l', un, une, des dans une phrase.",
+      prerequis:"L'élève connaît déjà le nom. Il sait distinguer un nom de personne, d'animal et de chose.",
+      rappel:"Rappel ciblé : « Qu'est-ce qu'un nom ? Donne-moi 2 noms. » Écris au tableau : chien, table, école. Fais souligner les noms. Demande : « Quel petit mot se place devant le nom ? »",
+      motivation:"Motivation concrète : Écris au tableau : « ___ cahier est sur ___ table. » Demande : « Quel petit mot manque ? Pourquoi on ne peut pas dire cahier tout seul ? » Laisse 3 élèves proposer, puis valide.",
+      pres:"Présentation du texte : Lis la petite phrase au tableau. Fais repérer tous les petits mots devant les noms. Entoure-les en couleur.",
+      c1:"Consigne 1 — Observer : Souligne le petit mot devant chaque nom dans les phrases au tableau. Exemple : Le chien court. Une fille chante. Les élèves lisent.",
+      c2:"Consigne 2 — Classer : Dans ton cahier, fais 2 colonnes. Mets dans la 1re : le, la, les, l' (articles définis). Dans la 2e : un, une, des (articles indéfinis).",
+      c3:"Consigne 3 — Compléter : Complète avec le bon article : ___ soleil, ___ lune, ___ enfants, ___ école, ___ vélo, ___ maison. Justifie ton choix à voix haute.",
+      synth:"Synthèse à faire dire aux élèves : « L'article se place devant le nom. Défini = le, la, les, l'. Indéfini = un, une, des. » Fais répéter 2 fois, puis écris la règle au tableau.",
+      eval:"Évaluation : 1) Entoure l'article : Le chat dort. Une souris passe. 2) Mets le bon article : ___ vélo, ___ maison, ___ enfants. 3) Défi : Écris toi-même 2 phrases avec un article défini et un article indéfini.",
+      mat:"Tableau, craie, ardoises, phrases au tableau avec articles à souligner, tableau des articles définis (le, la, les, l') et indéfinis (un, une, des), manuel de français."
+    };
+  }
+  if(FP2_sel.mat==="Calcul"||FP2_sel.mat==="Arithmétique"){
+    return {obj:"À la fin de la leçon, l'élève doit être capable de résoudre une situation d'addition en écrivant l'opération et en donnant le bon résultat.",
+    prerequis:"L'élève sait compter et connaît le sens de ajouter.",
+    rappel:"Rappel : Compte de 0 à 20 avec toute la classe. « Que veut dire ajouter ? Montre avec tes doigts : 5 + 3. »",
+    motivation:"Motivation : « Ali a 5 billes, il gagne 3 billes. Combien en a-t-il maintenant ? » Laisse les élèves proposer sans corriger tout de suite.",
+    pres:"Présentation de la situation : Dessine les billes au tableau. Fais reformuler le problème par 2 élèves.",
+    c1:"Consigne 1 — Représenter : Avec des objets / ardoises, représente la situation d'Ali.",
+    c2:"Consigne 2 — Calculer : Écris l'opération 5 + 3 = ___ et calcule.",
+    c3:"Consigne 3 — Vérifier : Compare avec ton voisin. Explique comment tu as trouvé.",
+    synth:"Synthèse : « Pour ajouter, on met ensemble et on compte le tout. »",
+    eval:"Évaluation : Calcule 7 + 5 = ___. 12 + 4 = ___. Problème : Sara a 8 mangues, elle achète 6 de plus. Combien en a-t-elle ?",
+    mat:"Tableau, craie, ardoises, objets à compter, matériel de numération, manuel de mathématiques."};
+  }
+  if(FP2_sel.mat==="Géographie"){
+    return {obj:"À la fin de la leçon, l'élève doit être capable de repérer le Burkina Faso et sa localité sur une carte et de nommer les points cardinaux.",
+    prerequis:"L'élève connaît son école, son quartier / village.",
+    rappel:"Rappel : « Où est notre école ? Notre village est dans quelle commune ? »",
+    motivation:"Motivation : Montre la carte. « Où est Bobo-Dioulasso sur cette carte ? Montre-moi avec ton doigt. »",
+    pres:"Observation (carte / image) : Observe la carte en silence 1 minute, puis montre le Burkina Faso, puis ta localité.",
+    c1:"Consigne 1 — Observer : Observe la carte, retrouve le Burkina Faso.",
+    c2:"Consigne 2 — Montrer : En groupe, montre sur la carte les éléments demandés.",
+    c3:"Consigne 3 — Dessiner : Dessine une carte simple avec les éléments vus.",
+    synth:"Synthèse : « On a observé la carte et retrouvé les lieux importants. »",
+    eval:"Évaluation : Sur la carte, montre le Burkina Faso, ta localité, le nord et le sud.",
+    mat:"Carte du Burkina Faso, carte de la localité, tableau, craie, ardoises, manuel."};
+  }
+  var titre=document.getElementById('fp2-titre').value||"la leçon";
+  return {obj:"À la fin de la leçon, l'élève doit être capable de comprendre et d'utiliser : "+titre+".",
+  prerequis:"L'élève a déjà vu la leçon précédente. Il peut donner un exemple simple.",
+  rappel:"Rappel : « Qu'avons-nous appris la dernière fois sur "+titre+" ? » Laisse 2 élèves répondre, complète si besoin.",
+  motivation:"Motivation : Présente une petite situation de la vie de tous les jours avec "+titre+" : à la maison, au marché, à l'école. Demande : « Que remarquez-vous ? »",
+  pres:"Présentation de la situation : Présente la situation au tableau. Fais la lire / observer par les élèves.",
+  c1:"Consigne 1 — Observer / Lire : En groupe, observez la situation au tableau et dites ce que vous comprenez.",
+  c2:"Consigne 2 — Chercher : Cherchez la réponse, discutez, écrivez sur l'ardoise.",
+  c3:"Consigne 3 — Présenter : Présentez au tableau, expliquez, corrigez ensemble.",
+  synth:"Synthèse : On retient ensemble la règle / l'idée principale de "+titre+". Fais répéter par 2 élèves.",
+  eval:"Évaluation : Réponds seul : 2 petites questions sur "+titre+". Défi : 1 question plus difficile.",
+  mat:"Tableau, craie, ardoises, manuel de la classe et supports adaptés à "+titre+"."};
+}
+
+function FP2_generer(){
+  var C=contenu();
+  var D=parseInt(FP2_sel.duree||45);
+  var pres = D===30?5:(D===45?8:10), dev = D===30?19:(D===45?28:38), ev = D===30?6:(D===45?9:12);
+  var g=parseInt(document.getElementById('fp2-garc').value||0), f=parseInt(document.getElementById('fp2-fill').value||0);
+  var titre=document.getElementById('fp2-titre').value||"___";
+  var theme=document.getElementById('fp2-theme').value||"___";
+  var dt=document.getElementById('fp2-date').value||"";
+  var dateTxt=dt?new Date(dt+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}):"___";
+  var isMaths=(FP2_sel.mat==="Calcul"||FP2_sel.mat==="Arithmétique");
+  var html="";
+  html+='<div class="f-head"><div class="ecole">'+document.getElementById('fp2-ecole').value+'</div><div class="ceb">CEB : '+document.getElementById('fp2-ceb').value+'</div><div style="margin-top:8px"><b>FICHE DE PRÉPARATION API</b></div><div class="lecon">LEÇON : '+titre+'</div><div class="theme">Thème : '+theme+'</div><div class="badge">Classe : '+FP2_sel.classe+' &nbsp;•&nbsp; Durée : '+D+' min</div></div>';
+  html+='<div class="meta"><div><b>Date :</b> '+dateTxt+'</div><div><b>Durée :</b> '+D+' min</div><div><b>Classe :</b> '+FP2_sel.classe+'</div><div><b>Effectif :</b> '+(g+f)+' élèves — Garçons : '+g+' ; Filles : '+f+'</div><div><b>Champ :</b> '+FP2_sel.champ+'</div><div><b>Discipline :</b> '+FP2_sel.disc+'</div><div><b>Matière :</b> '+FP2_sel.mat+'</div><div><b>Thème :</b> '+theme+'</div></div>';
+  html+='<h3>1. Objectifs</h3><p>'+C.obj+'</p><h3>2. Prérequis</h3><p>'+C.prerequis+'</p><h3>3. Matériel</h3><p>'+C.mat+'</p><h3>4. Documents</h3><p>Guide de l’enseignant API, Manuel de la classe, Curricula API.</p>';
+  html+='<h3>5. Déroulement détaillé</h3><table><tr><th style="width:15%">Étape</th><th>Activité / Consignes précises pour l’enseignant</th><th style="width:22%">Ce que font les élèves</th></tr>';
+  html+='<tr><td class="step"><b>PRÉSENTATION<br>'+pres+' min</b></td><td><b>Rappel ('+Math.round(pres*0.4)+' min) :</b> '+C.rappel+'<br><br><b>Motivation ('+Math.round(pres*0.3)+' min) :</b> '+C.motivation+'<br><br><b>'+(isMaths?"Calcul mental (2 min) : Fais 3 petits calculs rapides à l’oral.":"Présentation (2 min) : ")+'</b> '+(isMaths?"Ex : 4+3, 10-2, 6+6. Corrige vite.":C.pres)+'</td><td>Répondent, observent, proposent. Ils lèvent la main, ils parlent à voix haute.</td></tr>';
+  html+='<tr><td class="step"><b>DÉVELOPPEMENT<br>'+dev+' min</b></td><td><b>Situation-problème :</b> Présente la situation liée à « '+titre+' » au tableau. Fais reformuler par 2 élèves.<br><br><b>'+C.c1+'</b><br><br><b>'+C.c2+'</b><br><br><b>'+C.c3+'</b><br><br><b>Synthèse :</b> '+C.synth+'</td><td>Cherchent en groupe, discutent, écrivent sur l’ardoise, présentent au tableau, expliquent.</td></tr>';
+  html+='<tr><td class="step"><b>ÉVALUATION<br>'+ev+' min</b></td><td><b>Évaluation :</b> '+C.eval+'<br><br><b>Correction :</b> Corrige tout de suite au tableau avec les élèves. Repère ceux qui n’ont pas compris.<br><br><b>Remédiation :</b> Reprends la règle avec les élèves en difficulté, en petit groupe, avec un exemple plus simple.<br><br><b>Prolongement :</b> Devoir à la maison : 2 petits exercices sur « '+titre+' » à faire dans le cahier.</td><td>Répondent seuls, corrigent, recopient la règle. Les plus rapides aident les autres.</td></tr></table>';
+  html+='<h3>6. Ce que l’enseignant doit surveiller</h3><ul><li><b>Pendant la présentation :</b> Tous les élèves écoutent-ils ? Pose la question à ceux qui ne parlent jamais.</li><li><b>Pendant le développement :</b> Passe dans les groupes. Vérifie que chaque groupe écrit quelque chose.</li><li><b>Pendant l’évaluation :</b> Ne donne pas la réponse. Laisse l’élève chercher 1 minute, puis aide-le.</li><li><b>Si ça ne marche pas :</b> Reprends avec un exemple plus simple, plus proche de la vie des élèves.</li></ul>';
+  html+='<h3>7. Observations / Remarques après la leçon</h3><p style="border:1px dashed #999;min-height:55px;padding:8px">Ce qui a bien marché : __________________________________________________<br>Ce qui n’a pas marché : __________________________________________________<br>À reprendre demain : __________________________________________________</p>';
+  html+='<div class="sig"><div>Signature de l’enseignant(e)<br><br>Nom : __________________</div><div>Visa du directeur<br><br>Nom / Cachet : __________________</div></div>';
+  html+='<div style="text-align:center;margin-top:14px"><button onclick="FP2_imprimer()" style="background:#0a6b2e;color:#fff;border:none;padding:13px 22px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer">🖨️ Imprimer la fiche</button></div>';
+  document.getElementById('fp2-out').innerHTML=html;
+  
+}
+
 function FP2_imprimer(){
   var out=document.getElementById('fp2-out');if(!out||!out.innerHTML.trim()){toast('⚠️ Générez d’abord la fiche','#cc0000');return}
   var titreTxt=(document.getElementById('fp2-titre').value||'Fiche').replace(/[^a-zA-Z0-9À-ÿ ]/g,'').trim().replace(/\s+/g,'_')||'Fiche';
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
-  // NOUVELLE MÉTHODE : on coupe la fiche en 2 vraies pages séparées.
-  // Page 1 = en-tête + Présentation + Développement. Page 2 = Évaluation + Signatures.
-  var tmp=document.createElement('div');tmp.innerHTML=out.innerHTML;
-  var table=tmp.querySelector('table');var rows=table?table.querySelectorAll('tr'):[];
-  var avant='';var enfant=tmp.childNodes;for(var k=0;k<enfant.length;k++){if(enfant[k]===table)break;avant+=enfant[k].outerHTML||enfant[k].textContent||'';}
-  var pied='';var apres=false;for(var k2=0;k2<enfant.length;k2++){if(enfant[k2]===table){apres=true;continue;} if(apres){pied+=enfant[k2].outerHTML||'';}}
-  // Le pied contient déjà les signatures + le bouton, on ne garde que les signatures
-  var sigDiv=document.createElement('div');sigDiv.innerHTML=pied;var sig='';var divs=sigDiv.querySelectorAll('div');for(var s=0;s<divs.length;s++){if(divs[s].textContent.indexOf('Le Ma')>=0||divs[s].textContent.indexOf('Le Directeur')>=0){sig+=divs[s].outerHTML;}}
-  var entete=rows.length?rows[0].outerHTML:'';var pres=rows.length>1?rows[1].outerHTML:'';var dev=rows.length>2?rows[2].outerHTML:'';var evalRow=rows.length>3?rows[3].outerHTML:'';
-  var css='@page{size:A4 portrait;margin:13mm}body{font-family:Arial;padding:0;margin:0;color:#111;font-size:14px;line-height:1.6}.page{width:100%;min-height:265mm;page-break-after:always;position:relative}.page:last-child{page-break-after:auto}h3{text-align:center;font-size:19px;margin:6px 0 10px}h3+p{text-align:center;font-size:14.5px;line-height:1.65}p{margin:11px 0;font-size:14px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}th,td{border:1px solid #111;padding:12px 9px;vertical-align:top;line-height:1.6}tr{page-break-inside:avoid}.suite{font-size:12px;color:#555;text-align:center;margin-top:10px}.titre2{text-align:center;font-size:17px;margin:0 0 10px}';
-  var page1='<div class="page">'+avant+'<table>'+entete+pres+dev+'</table><p class="suite">— Suite page 2 : Évaluation —</p></div>';
-  var page2='<div class="page"><p class="titre2"><b>FICHE DE PRÉPARATION API — Suite</b><br>'+titreTxt.replace(/_/g,' ')+' — '+nomClasse+'</p><table>'+entete+evalRow+'</table><div style="margin-top:16px">'+sig+'</div></div>';
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+page1+page2+'</body></html>';
+  var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+out.innerHTML+'</body></html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
