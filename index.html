@@ -205,51 +205,7 @@ hr{border:none;border-top:1px solid var(--bd);margin:10px 0}
 })();
 </script>
 
-<!-- ===== EduBFv2 - AJOUTS VERROUILLES - FICHES + LICENCE GMAIL + DESIGN IMPRESSION - NE PAS EFFACER LE RESTE ===== -->
-<style>
-.edubf-ajout{font-family:Arial,sans-serif;margin:85px 10px 10px;padding:0}
-.edubf-ajout .banniere{background:#0a6b2e;color:#fff;padding:14px;border-radius:10px;text-align:center}
-.edubf-ajout .banniere h2{margin:0;font-size:18px}
-.edubf-ajout .carte{background:#fff;border:2px solid #0a6b2e;border-radius:10px;padding:12px;margin-top:10px}
-.edubf-ajout label{font-weight:bold}
-.edubf-ajout input{width:100%;padding:12px;border:2px solid #333;border-radius:8px;box-sizing:border-box;margin:6px 0 10px}
-.edubf-ajout button{width:100%;padding:13px;background:#0a6b2e;color:#fff;border:0;border-radius:10px;font-weight:bold;font-size:15px}
-.edubf-ajout .petit{font-size:13px;color:#333}
-@media print{
-  body{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
-  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
-}
-</style>
-<div class="edubf-ajout" id="edubf-ajouts-verrouilles">
-  <div class="banniere"><h2>🇧🇫 EduBFv2 - Verrouillé 🔒</h2><p style="margin:6px 0 0">Fiches + Licence Gmail + Design à l'impression</p></div>
-  <div class="carte">
-    <h3 style="margin:0">🔒 Licence - Connexion</h3>
-    <p class="petit">Plus de code à copier. Mets ton Gmail et ton mot de passe que tu connais. 1 compte = 1 téléphone. Sans validation du responsable, EduBF reste sur « En attente ».</p>
-    <label>Gmail</label><input id="edubf-gmail" placeholder="ex: awa.traore@gmail.com">
-    <label>Mot de passe (secret)</label><input id="edubf-mdp" type="password" placeholder="••••••••">
-    <button onclick="edubfDemander()">Demander l'activation</button>
-    <p id="edubf-msg-lic" class="petit"></p>
-    <p class="petit"><b>Règle :</b> Le mot de passe reste secret, même pour le responsable. Le responsable voit seulement ton Gmail et touche Valider ou Bloquer dans son Gestionnaire.</p>
-  </div>
-  <div class="carte">
-    <h3 style="margin:0">📝 Fiches de Préparation - Règle à respecter</h3>
-    <p class="petit"><b>Calcul mental :</b> seulement en Calcul / Mathématiques. <b>Jamais</b> en Français ni en Géographie.</p>
-    <p class="petit"><b>Déroulement :</b> Présentation (avec calcul mental si Calcul), Rappel, Motivation, Développement, Présentation de la situation problème, Consigne 1, Consigne 2, Consigne 3, Synthèse / Récapitulation, Évaluation, Évaluation des acquis, Activités de prolongement.</p>
-    <p class="petit"><b>Fiche :</b> max 2 pages. Matériel et documentation remplis selon le titre de la leçon. Renseignements (école, CEB, effectif) remplis une fois et réutilisés.</p>
-    <p class="petit"><b>Documents :</b> Bulletins, Propositions, Tableau synoptique par discipline, Liste A3 en 1 page même avec grand effectif, Certificat sans dessin, sans Faso école pro / EduBF en bas, un seul espace Signature et cachet du Directeur.</p>
-    <p class="petit"><b>Impression :</b> Fond et couleurs gardés à l'impression, comme à l'écran.</p>
-  </div>
-</div>
-<script>
-function edubfDemander(){
-  var g=document.getElementById('edubf-gmail').value||'';
-  var m=document.getElementById('edubf-msg-lic');
-  if(!g){m.textContent='Mets ton Gmail.';return;}
-  try{localStorage.setItem('edubf_demande_gmail',g);localStorage.setItem('edubf_demande_statut','En attente');}catch(e){}
-  m.textContent='⏳ Demande envoyée pour '+g+'. En attente de validation par le responsable.';
-}
-</script>
-<!-- ===== FIN AJOUTS EduBFv2 ===== -->
+<!-- Texte à l’entrée enlevé sur demande : bloc Verrouillé / Licence / Règle Fiches caché. La vraie Licence est licence-ecran, les vraies Fiches sont dans la section Fiches. -->
 
 <!-- ÉCRAN DE VERROUILLAGE PIN -->
 <div id="lock-screen" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#1a5c2a,#1a1a2e);z-index:99999;flex-direction:column;align-items:center;justify-content:center;padding:20px">
