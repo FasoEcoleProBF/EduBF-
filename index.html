@@ -338,7 +338,7 @@ function edubfDemander(){
     <div class="fg"><label>Titre</label><input id="fp2-titre" placeholder="Ex : L'article"></div>
     <div class="fg"><label>Durée - Touche un bouton</label><div class="btns" id="fp2-dureeBtns"></div></div>
   </div>
-  <div class="card"><div id="fp2-out"></div></div>
+  <div class="card"><div id="fp2-out"></div></div><div style="text-align:center;margin-top:10px"><button onclick="FP2_imprimer()" style="background:#0a6b2e;color:#fff;border:none;padding:15px 26px;border-radius:12px;font-size:17px;font-weight:800;cursor:pointer;width:100%">🖨️ IMPRIMER LA FICHE</button></div>
 </div>
 <style>.btns{display:flex;flex-wrap:wrap;gap:8px}.btns button{flex:1 1 45%;padding:13px;font-size:15px;font-weight:bold;background:#eee;border:2px solid #333;border-radius:10px;cursor:pointer;color:#111}.btns button.sel{background:#0a6b2e!important;color:#fff!important;border-color:#0a6b2e!important}</style>
 <script>
@@ -406,7 +406,7 @@ function FP2_contenu(){
 }
 
 function FP2_generer(){
-  var C=contenu();
+  var C=FP2_contenu();
   var D=parseInt(FP2_sel.duree||45);
   var pres = D===30?5:(D===45?8:10), dev = D===30?19:(D===45?28:38), ev = D===30?6:(D===45?9:12);
   var g=parseInt(document.getElementById('fp2-garc').value||0), f=parseInt(document.getElementById('fp2-fill').value||0);
@@ -437,7 +437,7 @@ function FP2_imprimer(){
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
   var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+out.innerHTML+'</body></html>';
+  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'</body></html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
