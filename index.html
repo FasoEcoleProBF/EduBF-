@@ -297,7 +297,7 @@ function edubfDemander(){
 <!-- ACCUEIL -->
 <div id="s-accueil" class="sec on">
   <div class="ph gh"><h2>Tableau de Bord</h2><p id="cur-date"></p></div>
-  <div class="dev">🇧🇫 La Patrie ou la Mort, nous Vaincrons ! &nbsp;|&nbsp; Burkina Faso 🇧🇫</div>
+  <!-- Bannière d’entrée enlevée sur demande -->
   <div class="dgrid">
     <div class="dc dcg" onclick="G('eleves')"><div class="di">👨‍🎓</div><div class="dn" id="t-el">0</div><div class="dl">Élèves</div></div>
     <div class="dc dcr" onclick="G('classes')"><div class="di">🏫</div><div class="dn" id="t-cl">0</div><div class="dl">Classes</div></div>
@@ -718,6 +718,32 @@ FP2_renderAll();FP2_generer();
 <!-- PARAMÈTRES -->
 <div id="s-parametres" class="sec">
   <div class="ph dh"><h2>Paramètres</h2></div>
+  <!-- GESTIONNAIRE LICENCES INTÉGRÉ ET LIÉ À L'APPLICATION -->
+  <div class="card" style="border:2px solid #0a6b2e">
+    <h3>🔒 Gestionnaire Licences — Gestionnaire seul</h3>
+    <p style="font-size:13px;color:#555">C'est ici que tu valides les enseignants. C'est lié à l'application : la liste est dans le même fichier, mêmes données. L'enseignant ne voit jamais cette partie.</p>
+    <div id="gest-login">
+      <div class="fg"><label>Mot de passe gestionnaire</label><input type="password" id="gest-mdp" placeholder="Mot de passe gestionnaire"/></div>
+      <button class="bp2" onclick="GEST_ouvrir()">🔓 Ouvrir le Gestionnaire</button>
+      <p style="font-size:12px;color:#666">Mot de passe gestionnaire pour tester aujourd'hui : <b>GESTION-2026</b> — tu le changeras après.</p>
+    </div>
+    <div id="gest-zone" style="display:none">
+      <div class="fg"><label>Gmail enseignant à valider</label><input type="text" id="gest-gmail" placeholder="enseignant@gmail.com"/></div>
+      <button class="bp2" onclick="GEST_ajouter()">✅ Valider cet enseignant — lui donner le code EDUBF-2026</button>
+      <div id="gest-liste" style="margin-top:12px"></div>
+      <p style="font-size:12px;color:#666;margin-top:10px">Code à donner à l'enseignant après validation : <b>EDUBF-2026</b><br>1 compte = 1 téléphone. Pour débloquer un enseignant qui a changé de téléphone, touche <b>Débloquer</b> dans la liste.</p>
+      <button class="bp2" onclick="GEST_fermer()" style="background:#666">🔒 Fermer le Gestionnaire</button>
+    </div>
+  </div>
+  <script>
+  function GEST_lire(){try{return JSON.parse(localStorage.getItem('edubf_licences_gestion')||'[]');}catch(e){return [];}}
+  function GEST_ecrire(l){try{localStorage.setItem('edubf_licences_gestion',JSON.stringify(l));}catch(e){}}
+  function GEST_ouvrir(){var m=document.getElementById('gest-mdp').value||'';if(m!=='GESTION-2026'){toast('⚠️ Mot de passe gestionnaire incorrect','#cc0000');return;}document.getElementById('gest-login').style.display='none';document.getElementById('gest-zone').style.display='block';GEST_afficher();toast('✅ Gestionnaire ouvert','#1a5c2a');}
+  function GEST_fermer(){document.getElementById('gest-zone').style.display='none';document.getElementById('gest-login').style.display='block';document.getElementById('gest-mdp').value='';}
+  function GEST_ajouter(){var g=(document.getElementById('gest-gmail').value||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)){toast('⚠️ Mets un Gmail valide','#cc0000');return;}var l=GEST_lire();if(l.some(function(x){return x.gmail===g;})){toast('⚠️ Déjà validé','#cc0000');return;}l.push({gmail:g,code:'EDUBF-2026',date:new Date().toLocaleDateString('fr-FR'),bloque:false});GEST_ecrire(l);document.getElementById('gest-gmail').value='';GEST_afficher();toast('✅ '+g+' validé — donne-lui le code EDUBF-2026','#1a5c2a');}
+  function GEST_basculer(g){var l=GEST_lire();l.forEach(function(x){if(x.gmail===g)x.bloque=!x.bloque;});GEST_ecrire(l);GEST_afficher();}
+  function GEST_afficher(){var l=GEST_lire();var z=document.getElementById('gest-liste');if(!z)return;if(!l.length){z.innerHTML='<p style="font-size:13px;color:#666">Aucun enseignant validé pour le moment.</p>';return;}z.innerHTML=l.map(function(x){return '<div style="border:1px solid #ccc;border-radius:10px;padding:10px;margin-bottom:8px"><b>'+x.gmail+'</b><br><small>Validé le '+x.date+' — Code : EDUBF-2026 — '+(x.bloque?'🔴 Bloqué':'🟢 Actif')+'</small><br><button onclick="GEST_basculer(\''+x.gmail+'\')" style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid #333;background:#eee;font-weight:700;cursor:pointer">'+(x.bloque?'✅ Débloquer':'🔒 Bloquer')+'</button></div>';}).join('');}
+  </script>
   <div class="card"><h3>🏫 Établissement</h3>
     <div class="fg"><label>Nom *</label><input type="text" id="pno" placeholder="École Primaire Publique de..."/></div>
     <div class="fr">
