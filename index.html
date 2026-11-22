@@ -353,8 +353,19 @@ function FP2_imprimer(){
   var titreTxt=(document.getElementById('fp2-titre').value||'Fiche').replace(/[^a-zA-Z0-9À-ÿ ]/g,'').trim().replace(/\s+/g,'_')||'Fiche';
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
-  var css='@page{size:A4 portrait;margin:14mm}body{font-family:Arial;padding:0;color:#111;font-size:14px;line-height:1.6}h3{text-align:center;font-size:19px;margin:6px 0 10px}h3+p{text-align:center;font-size:14.5px;line-height:1.65}p{margin:11px 0;font-size:14px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}th,td{border:1px solid #111;padding:12px 9px;vertical-align:top;line-height:1.6}tr{page-break-inside:avoid}table tr:last-child{page-break-before:always}';
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+out.innerHTML+'</body></html>';
+  // NOUVELLE MÉTHODE : on coupe la fiche en 2 vraies pages séparées.
+  // Page 1 = en-tête + Présentation + Développement. Page 2 = Évaluation + Signatures.
+  var tmp=document.createElement('div');tmp.innerHTML=out.innerHTML;
+  var table=tmp.querySelector('table');var rows=table?table.querySelectorAll('tr'):[];
+  var avant='';var enfant=tmp.childNodes;for(var k=0;k<enfant.length;k++){if(enfant[k]===table)break;avant+=enfant[k].outerHTML||enfant[k].textContent||'';}
+  var pied='';var apres=false;for(var k2=0;k2<enfant.length;k2++){if(enfant[k2]===table){apres=true;continue;} if(apres){pied+=enfant[k2].outerHTML||'';}}
+  // Le pied contient déjà les signatures + le bouton, on ne garde que les signatures
+  var sigDiv=document.createElement('div');sigDiv.innerHTML=pied;var sig='';var divs=sigDiv.querySelectorAll('div');for(var s=0;s<divs.length;s++){if(divs[s].textContent.indexOf('Le Ma')>=0||divs[s].textContent.indexOf('Le Directeur')>=0){sig+=divs[s].outerHTML;}}
+  var entete=rows.length?rows[0].outerHTML:'';var pres=rows.length>1?rows[1].outerHTML:'';var dev=rows.length>2?rows[2].outerHTML:'';var evalRow=rows.length>3?rows[3].outerHTML:'';
+  var css='@page{size:A4 portrait;margin:13mm}body{font-family:Arial;padding:0;margin:0;color:#111;font-size:14px;line-height:1.6}.page{width:100%;min-height:265mm;page-break-after:always;position:relative}.page:last-child{page-break-after:auto}h3{text-align:center;font-size:19px;margin:6px 0 10px}h3+p{text-align:center;font-size:14.5px;line-height:1.65}p{margin:11px 0;font-size:14px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}th,td{border:1px solid #111;padding:12px 9px;vertical-align:top;line-height:1.6}tr{page-break-inside:avoid}.suite{font-size:12px;color:#555;text-align:center;margin-top:10px}.titre2{text-align:center;font-size:17px;margin:0 0 10px}';
+  var page1='<div class="page">'+avant+'<table>'+entete+pres+dev+'</table><p class="suite">— Suite page 2 : Évaluation —</p></div>';
+  var page2='<div class="page"><p class="titre2"><b>FICHE DE PRÉPARATION API — Suite</b><br>'+titreTxt.replace(/_/g,' ')+' — '+nomClasse+'</p><table>'+entete+evalRow+'</table><div style="margin-top:16px">'+sig+'</div></div>';
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+page1+page2+'</body></html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
