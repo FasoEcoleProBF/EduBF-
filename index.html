@@ -3965,5 +3965,46 @@ document.addEventListener('DOMContentLoaded',function(){ setTimeout(simplifier,1
 setTimeout(simplifier,2500);
 })();
 </script>
+
+<script>
+// v29 - DEBLOCAGE : un seul code appareil = MA89..., on oublie l'ancien TEL-...
+(function(){
+  // Le vrai appareil, c'est celui affiche dans Parametres : MA89-MVBV-SCFQ, via getDeviceId()
+  function vraiAppareil(){
+    try{ if(window.getDeviceId) return window.getDeviceId(); }catch(e){}
+    return '';
+  }
+  // Si une ancienne licence etait liee a un TEL-... (ancien test), on la migre vers le vrai appareil
+  try{
+    var lic=JSON.parse(localStorage.getItem('edubf_licence')||'null');
+    var lic2=JSON.parse(localStorage.getItem('edubf_licence_12mois')||'null');
+    var vrai=vraiAppareil();
+    if(vrai){
+      if(lic && lic.device && lic.device!==vrai && lic.device.indexOf('TEL-')===0){
+        lic.device=vrai; localStorage.setItem('edubf_licence', JSON.stringify(lic));
+      }
+      if(lic2 && lic2.device && lic2.device!==vrai && lic2.device.indexOf('TEL-')===0){
+        lic2.device=vrai; localStorage.setItem('edubf_licence_12mois', JSON.stringify(lic2));
+      }
+      // On force aussi edubf_device a etre le vrai, pour que les 2 systemes parlent le meme
+      localStorage.setItem('edubf_device', vrai);
+    }
+  }catch(e){}
+  // On efface le message "verrouille" et on rouvre le formulaire
+  function debloquer(){
+    var ec=document.getElementById('licence-ecran'); if(!ec) return;
+    var msgs=document.querySelectorAll('#licence-ecran p, #licence-msg');
+    // On ne touche pas au formulaire, on efface juste le bandeau rouge de verrouillage si c'etait un faux verrouillage TEL-
+    var btn=document.querySelector('#licence-ecran button');
+    if(btn && btn.textContent.indexOf('verrouillé')>=0){
+      btn.textContent='Valider';
+    }
+    var msg=document.getElementById('licence-msg');
+    if(msg && msg.textContent.indexOf('verrouillé')>=0){ msg.textContent=''; msg.style.display='none'; }
+  }
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(debloquer,800); });
+  setTimeout(debloquer,2000);
+})();
+</script>
 </body>
 </html>
