@@ -3806,5 +3806,103 @@ function FP_generer(){
 }
 try{FP_majDisc();var d=document.getElementById('fp-date');if(d) d.value=new Date().toISOString().slice(0,10);}catch(e){}
 </script>
+
+<script>
+// EDU BF v27 - Licence 12 mois, style collegue : demande 1 fois, manager valide, WhatsApp groupe, mise a jour
+(function(){
+var SECRET='EduBF-12MOIS-2026';
+function h6(s){var a=5381;for(var i=0;i<s.length;i++){a=((a<<5)+a)+s.charCodeAt(i);a=a&0xffffffff;}return ('000000'+((a>>>0)%1000000)).slice(-6);}
+function device(){try{var d=localStorage.getItem('edubf_device');if(d)return d;}catch(e){} return 'TEL-?';}
+function codePour(gmail,dev){return h6((gmail||'').toLowerCase()+'|'+(dev||'').toUpperCase()+'|'+SECRET);}
+window.EDUBF_codePour=codePour;
+function lireReg(){try{return JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]');}catch(e){return[];}}
+function ecrireReg(l){try{localStorage.setItem('edubf_registre_12mois',JSON.stringify(l));}catch(e){}}
+// --- COTE CLIENT : remplacer la validation par code 6 chiffres ---
+window.LIC_valider=function(){
+  var gmailEl=document.getElementById('lic-gmail'); var mdpEl=document.getElementById('lic-mdp'); var codeEl=document.getElementById('lic-code');
+  var gmail=(gmailEl?gmailEl.value:'').trim().toLowerCase();
+  var mdp=mdpEl?mdpEl.value:'';
+  var code=(codeEl?codeEl.value:'').trim();
+  var msgEl=document.getElementById('licence-msg');
+  function msg(x){if(msgEl){msgEl.style.display='block';msgEl.textContent=x;}}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)){msg('Mets un Gmail valide');return;}
+  if(mdp.length<6){msg('Mot de passe : au moins 6 caracteres');return;}
+  if(code!==codePour(gmail,device())){msg('Code de validation incorrect. Demande ton code de 6 chiffres au gestionnaire.');return;}
+  var deb=new Date(); var exp=new Date(); exp.setMonth(exp.getMonth()+12);
+  try{
+    localStorage.setItem('edubf_licence',JSON.stringify({gmail:gmail,mdp:mdp,device:device(),date:deb.toISOString(),exp:exp.getTime(),duree:'12 mois'}));
+    localStorage.setItem('edubf_licence_12mois',JSON.stringify({gmail:gmail,device:device(),deb:deb.toISOString(),exp:exp.getTime()}));
+  }catch(e){}
+  var ec=document.getElementById('licence-ecran'); if(ec) ec.style.display='none';
+  if(window.toast) toast('Licence 12 mois activee jusqu au '+exp.toLocaleDateString('fr-FR'),'#1a5c2a');
+};
+// Verifier expiration a chaque ouverture : apres 12 mois, redemander
+function checkExp(){
+  try{
+    var lic=JSON.parse(localStorage.getItem('edubf_licence_12mois')||'null');
+    var ec=document.getElementById('licence-ecran'); if(!lic||!ec) return;
+    if(Date.now()>lic.exp){ ec.style.display='block'; var m=document.getElementById('licence-msg'); if(m){m.style.display='block';m.textContent='Licence de 12 mois terminee le '+new Date(lic.exp).toLocaleDateString('fr-FR')+'. Contacte le gestionnaire pour renouveler.';} }
+  }catch(e){}
+}
+// --- Bouton WhatsApp demande ---
+function injectClient(){
+  var ec=document.getElementById('licence-ecran'); if(!ec) return;
+  if(document.getElementById('btn-demande-wa')) return;
+  var info=document.getElementById('lic-info');
+  var p=document.createElement('p'); p.style.cssText='font-size:13px;color:#fff;text-align:center';
+  p.innerHTML='1. Mets ton Gmail + mot de passe.<br>2. Touche Demande WhatsApp pour envoyer ta demande.<br>3. Le gestionnaire te renvoie ton code de 6 chiffres.<br>4. Mets le code ici, touche Valider. Valable 12 mois.';
+  if(info) info.parentNode.insertBefore(p, info.nextSibling);
+  var b=document.createElement('button'); b.id='btn-demande-wa'; b.textContent='Envoyer ma demande WhatsApp'; b.style.cssText='width:100%;padding:12px;border-radius:10px;background:#25D366;color:#fff;font-weight:800;border:0;margin-top:10px;cursor:pointer';
+  b.onclick=function(){
+    var g=(document.getElementById('lic-gmail')||{}).value||''; g=g.trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)){alert('Mets d abord ton Gmail');return;}
+    var txt='Bonjour, je veux EduBF. Mon Gmail : '+g+' Mon telephone : '+device()+' Merci de me valider.';
+    window.open('https://wa.me/22676720728?text='+encodeURIComponent(txt),'_blank');
+  };
+  var btn=document.querySelector('#licence-ecran button'); if(btn&&btn.parentNode) btn.parentNode.insertBefore(b, btn);
+  var lbl=document.querySelector('#licence-ecran label'); // ne rien casser
+}
+// --- COTE GESTIONNAIRE : generer code 6 chiffres + registre 12 mois ---
+function injectGest(){
+  var gz=document.getElementById('gest-zone'); if(!gz||document.getElementById('gest-12mois-box')) return;
+  var d=document.createElement('div'); d.id='gest-12mois-box'; d.style.cssText='border:2px solid #1a5c2a;border-radius:14px;padding:14px;margin:14px 0;background:#f0f7f1';
+  d.innerHTML='<h3 style="margin:0 0 8px;color:#1a5c2a">Registre Licences - 12 mois - Gestionnaire seul</h3>'
+  +'<p style="font-size:13px;color:#555">Le client t envoie Gmail + TEL par WhatsApp. Tu mets les 2 ici, tu touches Generer. Tu lui renvoies son Gmail + son code de 6 chiffres.</p>'
+  +'<label style="font-weight:700">Gmail du client</label><input id="g12-gmail" placeholder="client@gmail.com" style="width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;margin:6px 0"/>'
+  +'<label style="font-weight:700">Code appareil du client</label><input id="g12-device" placeholder="Ex : TEL-XXXX" style="width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;margin:6px 0"/>'
+  +'<button id="g12-gen" style="width:100%;padding:12px;border-radius:10px;background:#1a5c2a;color:#fff;font-weight:800;border:0">Generer code 12 mois</button>'
+  +'<p id="g12-result" style="font-size:14px"></p>'
+  +'<h4 style="margin:12px 0 6px">Mes clients EduBF - 12 mois</h4><div id="g12-registre"></div>';
+  gz.appendChild(d);
+  document.getElementById('g12-gen').onclick=function(){
+    var g=(document.getElementById('g12-gmail').value||'').trim().toLowerCase();
+    var dv=(document.getElementById('g12-device').value||'').trim().toUpperCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)){alert('Mets un Gmail valide');return;}
+    if(dv.length<5){alert('Mets le code appareil TEL du client');return;}
+    var code=codePour(g,dv);
+    var deb=new Date(); var exp=new Date(); exp.setMonth(exp.getMonth()+12);
+    var reg=lireReg().filter(function(x){return x.gmail!==g;});
+    reg.push({gmail:g,device:dv,deb:deb.toLocaleDateString('fr-FR'),exp:exp.toLocaleDateString('fr-FR'),expTs:exp.getTime(),statut:'Actif'});
+    ecrireReg(reg);
+    document.getElementById('g12-result').innerHTML='Client : <b>'+g+'</b><br>Code a envoyer : <b style="font-size:22px">'+code+'</b><br>Du '+deb.toLocaleDateString('fr-FR')+' au <b>'+exp.toLocaleDateString('fr-FR')+'</b> (12 mois)<br>Message a copier : Ton Gmail '+g+' est valide. Ton code : '+code;
+    afficherReg();
+    alert('Code genere pour '+g+' : '+code);
+  };
+  afficherReg();
+}
+function afficherReg(){
+  var el=document.getElementById('g12-registre'); if(!el) return;
+  var reg=lireReg(); var now=Date.now();
+  if(!reg.length){el.innerHTML='<p>Aucun client pour le moment.</p>';return;}
+  el.innerHTML=reg.map(function(x){
+    var jours=Math.max(0,Math.ceil((x.expTs-now)/86400000));
+    var st=x.expTs<now?'Expire':(x.statut||'Actif');
+    return '<div style="border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0;text-align:left"><b>'+x.gmail+'</b><br><small>Appareil : '+x.device+'<br>Du '+x.deb+' au '+x.exp+' - Reste '+jours+' jour(s) - '+st+'</small></div>';
+  }).join('');
+}
+document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){injectClient();injectGest();checkExp();},900);});
+setTimeout(function(){injectClient();injectGest();checkExp();},2000);
+})();
+</script>
 </body>
 </html>
