@@ -1041,10 +1041,9 @@ function loadLicence(){
   return {ok:true, p:p};
 }
 function checkActivationOnStart(){
-  var L=loadLicence();
-  if(L.ok){ LIC=L.p; applyIdentity(); return true; }
-  /* ancien Activation requise désactivé */ showActivationScreen_DESACTIVE(L.err||'none');
-  return false;
+  /* v25 PROPRE : pas d'écran Activation requise. On ouvre Tableau de Bord direct, comme validé en Chrome. */
+  try{ var L=loadLicence(); if(L.ok){ LIC=L.p; applyIdentity(); } }catch(e){}
+  return true;
 }
 function applyIdentityToPA(){
   if(IDENT.nom) PA.nom=IDENT.nom;
@@ -1075,41 +1074,12 @@ function copierTexte(t,msg){
   function fb(){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){prompt('Copiez ce code :',t)}ta.remove()}
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fb)}else fb();
 }
-function copierCodeAppareil(){ copierTexte(getDeviceId(),'📋 Code appareil copié !'); }
+function copierCodeAppareil(){ /* ancien code appareil supprimé */ return; }
 function demanderCodeWhatsApp(){
   var url='https://wa.me/22676720728?text='+encodeURIComponent('Bonjour, je souhaite activer EduBF. Mon code appareil : '+getDeviceId());
   var w=window.open(url,'_blank'); if(!w) location.href=url;
 }
-function /* ancien Activation requise désactivé */ showActivationScreen_DESACTIVE(err){
-  if(document.getElementById('activation-screen')) return;
-  var titres={none:'Activation requise',expired:'Licence expirée',device:'Licence liée à un autre téléphone',clock:'Date du téléphone incorrecte',invalid:'Licence invalide'};
-  var details={
-    none:'EduBF est une application à usage individuel : chaque licence fonctionne sur UN seul téléphone. Envoyez votre code appareil à l\'administrateur pour recevoir votre code de licence.',
-    expired:'Votre licence est arrivée à son terme. Envoyez votre code appareil à l\'administrateur pour la renouveler.',
-    device:'Ce fichier contient une licence créée pour un autre téléphone. Envoyez votre code appareil à l\'administrateur pour obtenir la vôtre.',
-    clock:'La date de ce téléphone est en retard par rapport à la dernière utilisation. Corrigez la date et l\'heure puis rouvrez l\'application, ou contactez l\'administrateur.',
-    invalid:'La licence enregistrée n\'est pas valide. Contactez l\'administrateur.'
-  };
-  var div=document.createElement('div');
-  div.id='activation-screen';
-  div.style.cssText='position:fixed;inset:0;background:linear-gradient(160deg,#1a5c2a,#1a1a2e);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:22px 16px;overflow-y:auto;color:#fff';
-  div.innerHTML=
-    '<div style="text-align:center;margin:10px 0 14px"><div style="font-size:2.4rem">🔐</div>'+
-    '<h2 style="font-size:1.2rem;font-weight:800;margin:6px 0">'+(titres[err]||titres.none)+'</h2>'+
-    '<p style="font-size:.82rem;opacity:.9;max-width:330px;margin:0 auto">'+(details[err]||details.none)+'</p></div>'+
-    '<div style="background:#fff;color:#111;border-radius:14px;padding:16px;width:100%;max-width:360px">'+
-      '<div style="font-size:.75rem;color:#666">Votre code appareil</div>'+
-      '<div style="font-size:1.35rem;font-weight:800;letter-spacing:2px;color:#1a5c2a;margin:2px 0 8px">'+getDeviceId()+'</div>'+
-      '<button class="bs" onclick="copierCodeAppareil()">📋 Copier mon code appareil</button>'+
-      '<button class="bp" style="margin-top:6px;background:#25d366" onclick="demanderCodeWhatsApp()">💬 Demander mon code par WhatsApp</button>'+
-      '<hr style="margin:12px 0"/>'+
-      '<div class="fg"><label>Code de licence reçu</label><textarea id="act-licence" rows="4" placeholder="Collez ici le code de licence en entier"></textarea></div>'+
-      '<button class="bp" onclick="validerLicence(\'act\')">✅ Activer</button>'+
-      '<p id="act-error" style="color:#cc0000;font-size:.78rem;margin-top:8px;text-align:center"></p>'+
-    '</div>'+
-    '<div style="margin-top:14px;text-align:center;font-size:.78rem;opacity:.85"><p>Administrateur : <b>TRAORÉ Issiaka</b></p><p>WhatsApp 76 72 07 28 — 72 39 94 41 — 69 26 35 97</p><p style="opacity:.6;font-size:.7rem">Clé de licence : '+LIC_KEYID+'</p></div>';
-  document.body.appendChild(div);
-}
+function showActivationScreen_DESACTIVE(err){ /* ANCIEN SYSTEME SUPPRIME : ne crée plus aucun écran Activation requise. Seule Licence = licence-ecran Gmail + EDUBF-2026. */ return; }
 function validerLicence(src){
   var ta=document.getElementById(src==='set'?'set-licence':'act-licence');
   var errEl=document.getElementById(src==='set'?'set-lic-error':'act-error');
