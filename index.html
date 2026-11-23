@@ -4006,5 +4006,38 @@ setTimeout(simplifier,2500);
   setTimeout(debloquer,2000);
 })();
 </script>
+
+<script>
+// v30 - Nettoyage : enlever vieux EDUBF-2026, header = EduBF seul, ecole du client = la sienne
+(function(){
+function nettoyer(){
+  // 1. Cacher l'ancien bouton Valider cet enseignant EDUBF-2026 + son Gmail + son texte
+  try{
+    var btn=document.querySelector('button[onclick="GEST_ajouter()"]');
+    if(btn){ btn.style.display='none'; }
+    var gg=document.getElementById('gest-gmail'); if(gg){ gg.style.display='none'; var lab=gg.closest('.fg'); if(lab) lab.style.display='none'; }
+    // Cacher le paragraphe qui dit "Code a donner : EDUBF-2026" dans gest-zone
+    var gz=document.getElementById('gest-zone');
+    if(gz){ gz.querySelectorAll('p').forEach(function(p){ if(p.textContent.indexOf('EDUBF-2026')>=0 && p.textContent.indexOf('Registre')<0) p.style.display='none'; }); }
+  }catch(e){}
+  // 2. En haut a droite, on montre seulement "EduBF", pas le nom de l'etablissement
+  // Le nom de l'ecole reste dans Parametres et dans les documents, pas dans le bandeau du haut
+  try{
+    document.querySelectorAll('header *, .topbar *, #topbar *').forEach(function(el){
+      if(el.children.length===0 && el.textContent.trim()==='EduBF - TRAORÉ Issiaka'){ el.textContent='EduBF'; }
+    });
+  }catch(e){}
+  // 3. Si le client n'a jamais rempli son ecole, on lui demande une fois son ecole, pas celle du concepteur
+  try{
+    var pno=document.getElementById('pno');
+    // On ne force rien sur ton telephone (tu as deja ton ecole), on aide seulement les nouveaux clients :
+    // Si pno est vide, on met un exemple a remplir, pas le nom du concepteur
+    if(pno && !pno.value){ pno.placeholder='Ex : Ecole de ... (nom de TON ecole)'; }
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(nettoyer,1200); setTimeout(nettoyer,3000); });
+setTimeout(nettoyer,2500);
+})();
+</script>
 </body>
 </html>
