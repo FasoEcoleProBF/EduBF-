@@ -4039,5 +4039,72 @@ document.addEventListener('DOMContentLoaded', function(){ setTimeout(nettoyer,12
 setTimeout(nettoyer,2500);
 })();
 </script>
+
+<script>
+// v31 - FIX DEFINITIF NOM ETABLISSEMENT : ton nom ne doit plus jamais etre le nom de l'ecole
+(function(){
+  // 1. La licence ne doit PLUS imposer le nom de l'ecole. L'ecole, c'est le client qui la choisit.
+  // On remplace les 2 fonctions qui ecrasaient PA.nom avec LIC.n
+  window.applyIdentityToPA = function(){
+    try{
+      // On ne touche PLUS a PA.nom. On garde seulement dir si besoin, mais jamais nom.
+      if(window.IDENT && window.IDENT.dir && window.PA){ /* on laisse PA.dir tel quel */ }
+    }catch(e){}
+  };
+  window.lockIdentityFields = function(){
+    // On ne verrouille PLUS la case NOM de l'etablissement. Le client doit pouvoir l'ecrire.
+    try{
+      var pno=document.getElementById('pno');
+      if(pno){ pno.readOnly=false; pno.removeAttribute('readonly'); pno.style.background=''; pno.style.color=''; pno.title='Mets le nom de TON ecole'; }
+    }catch(e){}
+    // On laisse les autres champs comme avant, sauf pno
+    try{
+      if(window.IDENT){
+        var lock=function(id,val){ var el=document.getElementById(id); if(!el||!val) return; el.value=val; el.readOnly=true; el.style.background='#eef3ee'; el.style.color='#555'; };
+        // pdi, cle, eceb restent verrouilles si la licence les a fixes, mais pas pno
+        lock('pdi', window.IDENT.dir); lock('cle', window.IDENT.ens); lock('eceb', window.IDENT.ceb);
+      }
+    }catch(e){}
+  };
+  // 2. Effacer le nom du concepteur qui etait enregistre comme nom d'ecole
+  function nettoyerNom(){
+    try{
+      // Dans les reglages sauves (ebf_params)
+      var raw=localStorage.getItem('ebf_params');
+      if(raw){
+        var pa=JSON.parse(raw);
+        if(pa && pa.nom==='EduBF - TRAORÉ Issiaka'){
+          pa.nom=''; // vide : le client mettra SA propre ecole
+          localStorage.setItem('ebf_params', JSON.stringify(pa));
+          if(window.PA) window.PA.nom='';
+        }
+      }
+      // Dans la case visible
+      var pno=document.getElementById('pno');
+      if(pno && pno.value==='EduBF - TRAORÉ Issiaka'){
+        pno.value=''; pno.readOnly=false; pno.removeAttribute('readonly'); pno.style.background=''; pno.style.color='';
+        pno.placeholder='Ex : Ecole Primaire Publique de ... (nom de TON ecole)';
+      }
+      // En haut a droite, juste EduBF
+      document.querySelectorAll('header *, .topbar *').forEach(function(el){
+        if(el.children.length===0 && el.textContent.trim()==='EduBF - TRAORÉ Issiaka'){ el.textContent='EduBF'; }
+      });
+    }catch(e){}
+  }
+  // On nettoie tout de suite, et a chaque ouverture de Parametres (car l'app re-remplit la case)
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(nettoyerNom,500); setTimeout(nettoyerNom,1500); setTimeout(nettoyerNom,3000); });
+  setTimeout(nettoyerNom,800); setTimeout(nettoyerNom,2000);
+  // Quand tu touches Parametres, on re-nettoie
+  document.addEventListener('click', function(e){
+    if(e.target && (e.target.textContent||'').indexOf('Param')>=0){ setTimeout(nettoyerNom,600); setTimeout(nettoyerNom,1200); }
+  });
+  // Si l'app re-verrouille, on de-verrouille en continu, doucement
+  setInterval(function(){
+    var pno=document.getElementById('pno');
+    if(pno && pno.readOnly){ pno.readOnly=false; pno.removeAttribute('readonly'); pno.style.background=''; pno.style.color=''; }
+    if(pno && pno.value==='EduBF - TRAORÉ Issiaka'){ pno.value=''; }
+  }, 1500);
+})();
+</script>
 </body>
 </html>
