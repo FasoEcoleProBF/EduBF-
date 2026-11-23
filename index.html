@@ -4500,5 +4500,150 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
   // (le mot de passe reste celui que tu connais déjà, on ne l'affiche jamais ici)
 })();
 </script>
+
+<style id="edubf-v37-style">
+#edubf-emarg-preview{ display:none; position:fixed; inset:0; z-index:9999999; background:rgba(0,0,0,.6); padding:14px; overflow:auto; }
+#edubf-emarg-card{ background:#fff; border-radius:16px; max-width:560px; margin:30px auto; padding:18px; }
+#edubf-emarg-card .em-preview-box{ border:2px solid #222; border-radius:8px; padding:12px; margin-top:12px; }
+#edubf-emarg-card .em-preview-row{ display:flex; gap:10px; }
+#edubf-emarg-card .em-preview-col{ flex:1; border:1px solid #777; border-radius:6px; padding:8px; text-align:center; min-height:110px; }
+#edubf-emarg-card .em-preview-col img{ max-width:120px; max-height:50px; display:block; margin:6px auto; }
+</style>
+<div id="edubf-emarg-preview"><div id="edubf-emarg-card">
+<h2 style="margin:0;color:#157a3a">✍️ Émargement - Aperçu</h2>
+<p style="font-size:13px;color:#555">Voilà à quoi ressemblera le bas de tes documents imprimés. Si une case est vide, va mettre la signature dans <b>Signatures &amp; Cachets</b>.</p>
+<div id="edubf-emarg-preview-content"></div>
+<button id="edubf-emarg-preview-close" style="width:100%;padding:12px;border-radius:10px;border:none;background:#1a9a4a;color:#fff;font-weight:700;margin-top:14px;cursor:pointer">Fermer</button>
+<button id="edubf-emarg-preview-goto-sig" style="width:100%;padding:12px;border-radius:10px;border:1px solid #1a9a4a;background:#e8f8ee;color:#157a3a;font-weight:700;margin-top:8px;cursor:pointer">Aller à Signatures &amp; Cachets</button>
+</div></div>
+<script> // V37 - Voir Emargement depuis Parametres
+(function(){
+  function lireSig(){ try{ return JSON.parse(localStorage.getItem('edubf_signatures_v33')||'{}'); }catch(e){ return {}; } }
+  function ouvrirApercu(){
+    var d=lireSig();
+    var defs=[{id:'ens1',label:'Enseignant 1'},{id:'ens2',label:'Enseignant 2'},{id:'dir',label:'Directeur'}];
+    var html='<div class="em-preview-box"><b style="display:block;text-align:center">✍️ ÉMARGEMENT - Bulletins / Synoptique / Résultats</b><div class="em-preview-row" style="margin-top:10px">';
+    defs.forEach(function(p){ var v=d[p.id]||{}; html+='<div class="em-preview-col"><small>'+p.label+'</small><br><b>'+(v.nom||'Nom : ...')+'</b>'+(v.signature?'<img src="'+v.signature+'">':'<div style="border-bottom:1px solid #222;height:34px;margin:8px 10px"></div>')+(v.cachet?'<img src="'+v.cachet+'">':'')+'<br><small>Signature - Date</small></div>'; });
+    html+='</div></div>';
+    html+='<div class="em-preview-box"><b style="display:block;text-align:center">✍️ ÉMARGEMENT - Fiches de Préparation</b><div class="em-preview-row" style="margin-top:10px">';
+    [{id:'ens1',label:'Enseignant'},{id:'dir',label:'Directeur'}].forEach(function(p){ var v=d[p.id]||{}; html+='<div class="em-preview-col"><small>'+p.label+'</small><br><b>'+(v.nom||'Nom : ...')+'</b>'+(v.signature?'<img src="'+v.signature+'">':'<div style="border-bottom:1px solid #222;height:34px;margin:8px 10px"></div>')+(v.cachet?'<img src="'+v.cachet+'">':'')+'<br><small>Signature - Date</small></div>'; });
+    html+='</div><p style="font-size:12px;color:#666;text-align:center">Pour les fiches : seulement Enseignant + Directeur.</p></div>';
+    document.getElementById('edubf-emarg-preview-content').innerHTML=html;
+    document.getElementById('edubf-emarg-preview').style.display='block';
+  }
+  function ajouterBoutonsV37(){
+    // 1) Dans Paramètres : bouton Voir Emargement
+    if(!document.getElementById('edubf-voir-emarg')){
+      var params = Array.from(document.querySelectorAll('*')).find(function(el){ return el.tagName==='H1' && (el.textContent||'').trim()==='Paramètres'; });
+      if(params && params.parentNode){
+        var b=document.createElement('button'); b.id='edubf-voir-emarg'; b.textContent='✍️ Voir Émargement des enseignants';
+        b.style.cssText='display:block;width:100%;padding:13px;border-radius:12px;border:1px solid #1a9a4a;background:#e8f8ee;color:#157a3a;font-weight:800;margin:10px 0;cursor:pointer';
+        b.onclick=ouvrirApercu;
+        params.parentNode.insertBefore(b, params.nextSibling);
+        var aide=document.createElement('p'); aide.style.cssText='font-size:12px;color:#666;margin:0 0 10px'; aide.textContent='Ceci montre l’émargement qui apparaîtra en bas de tes documents imprimés. Pour remplir les signatures, va dans Signatures & Cachets.';
+        params.parentNode.insertBefore(aide, b.nextSibling);
+      }
+    }
+    // 2) Dans Accueil aussi, si pas déjà là
+    if(!document.getElementById('edubf-voir-emarg-accueil')){
+      var accueilBtn=document.getElementById('edubf-sig-open');
+      if(accueilBtn && accueilBtn.parentNode){
+        var b2=document.createElement('button'); b2.id='edubf-voir-emarg-accueil'; b2.textContent='👀 Voir Émargement';
+        b2.style.cssText='padding:10px 14px;border-radius:999px;border:1px solid #1a9a4a;background:#fff;color:#157a3a;font-weight:700;margin:6px;cursor:pointer';
+        b2.onclick=ouvrirApercu;
+        accueilBtn.parentNode.insertBefore(b2, accueilBtn.nextSibling);
+      }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){ ajouterBoutonsV37(); });
+  setTimeout(ajouterBoutonsV37, 2000); setTimeout(ajouterBoutonsV37, 4000);
+  var c=document.getElementById('edubf-emarg-preview-close'); if(c) c.onclick=function(){ document.getElementById('edubf-emarg-preview').style.display='none'; };
+  var g=document.getElementById('edubf-emarg-preview-goto-sig'); if(g) g.onclick=function(){ document.getElementById('edubf-emarg-preview').style.display='none'; var s=document.getElementById('edubf-sig-open'); if(s) s.click(); else { var p=document.getElementById('edubf-sig-panel'); if(p) p.style.display='block'; } };
+})();
+</script>
+
+<style id="edubf-v38-style">
+#edubf-update-banner{ display:none; position:fixed; top:0; left:0; right:0; z-index:99999999; background:#ffcc00; color:#111; padding:12px 14px; text-align:center; font-weight:700; box-shadow:0 2px 10px rgba(0,0,0,.3); }
+#edubf-update-banner button{ margin-left:10px; padding:9px 16px; border:none; border-radius:999px; background:#0f3d22; color:#fff; font-weight:800; cursor:pointer; }
+#edubf-update-modal{ display:none; position:fixed; inset:0; z-index:99999999; background:rgba(0,0,0,.6); padding:16px; overflow:auto; }
+#edubf-update-card{ background:#fff; border-radius:16px; max-width:480px; margin:40px auto; padding:20px; text-align:center; }
+#edubf-update-card button{ width:100%; padding:13px; border-radius:12px; border:none; font-weight:800; margin-top:10px; cursor:pointer; }
+</style>
+<div id="edubf-update-banner">⭐ Nouvelle version EduBF disponible <button id="edubf-update-btn">Mettre à jour maintenant</button></div>
+<div id="edubf-update-modal"><div id="edubf-update-card">
+<div style="font-size:42px">⭐</div>
+<h2 style="margin:8px 0;color:#157a3a">Mise à jour EduBF v38</h2>
+<p style="font-size:14px;color:#444">Nouveautés reçues automatiquement :</p>
+<p style="text-align:left;font-size:14px;line-height:1.7">
+✅ Émargement des enseignants en bas des documents<br>
+✅ Signatures &amp; Cachets enregistrés<br>
+✅ Nom du document dans le PDF<br>
+✅ Vert plus clair, design plus propre<br>
+✅ Mode hors réseau<br>
+✅ <b>Mot de passe Gestionnaire caché</b> - plus jamais affiché<br>
+</p>
+<p style="font-size:12px;color:#888">Tes élèves, tes notes et ta licence ne seront pas effacés.</p>
+<button id="edubf-update-confirm" style="background:#1a9a4a;color:#fff">✅ Mettre à jour maintenant</button>
+<button id="edubf-update-later" style="background:#eee">Plus tard</button>
+</div></div>
+<script> // V38 - Mise à jour auto + Cache mot de passe
+(function(){
+  var VERSION_ACTUELLE = 38;
+  var VERSION_KEY = 'edubf_version';
+  // 1) Cacher automatiquement tout texte qui afficherait le mot de passe gestionnaire
+  function cacherMotDePasse(){
+    try{
+      document.querySelectorAll('p, div, span, small').forEach(function(el){
+        var t = el.textContent||'';
+        // Si un texte parle du mot de passe gestionnaire "pour tester" ou l'affiche, on le remplace
+        if(t.indexOf('pour tester')>=0 && t.toLowerCase().indexOf('gestionnaire')>=0){
+          el.innerHTML = 'Réservé au gestionnaire. Ne partage jamais ce mot de passe.';
+        }
+        // Si un texte contient un mot de passe affiché en clair à côté de "Mot de passe gestionnaire", on le masque
+        if(el.children.length===0 && t.toLowerCase().indexOf('mot de passe gestionnaire')>=0 && t.length>40){
+          // On ne garde que la première phrase, on efface le reste qui pourrait contenir le mot de passe
+          if(t.indexOf(':')>=0){ el.textContent = 'Réservé au gestionnaire. Ne partage jamais ce mot de passe.'; }
+        }
+      });
+      var mdpInput = document.getElementById('gest-mdp');
+      if(mdpInput){ mdpInput.type='password'; mdpInput.setAttribute('autocomplete','off'); }
+    }catch(e){}
+  }
+  // 2) Vérifier la version : si l'utilisateur a une ancienne version, on lui propose la mise à jour
+  function verifierMiseAJour(){
+    var ancienne = 0;
+    try{ ancienne = parseInt(localStorage.getItem(VERSION_KEY)||'0', 10) || 0; }catch(e){}
+    // Si c'est la première ouverture de la v38, on enregistre la version sans déranger
+    // Mais si l'utilisateur vient d'une ancienne version (ex: v31, v32...), on montre la mise à jour
+    if(ancienne>0 && ancienne < VERSION_ACTUELLE){
+      var banner=document.getElementById('edubf-update-banner');
+      if(banner) banner.style.display='block';
+      setTimeout(function(){ var m=document.getElementById('edubf-update-modal'); if(m) m.style.display='block'; }, 1200);
+    }
+    try{ localStorage.setItem(VERSION_KEY, String(VERSION_ACTUELLE)); }catch(e){}
+  }
+  function appliquerMiseAJour(){
+    try{ localStorage.setItem(VERSION_KEY, String(VERSION_ACTUELLE)); }catch(e){}
+    try{ cacherMotDePasse(); }catch(e){}
+    // On recharge avec un nouveau numéro de version pour forcer le téléphone à prendre la nouvelle version
+    try{
+      if('caches' in window){ caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }); }
+      if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); }); }
+    }catch(e){}
+    var url = location.href.split('?')[0] + '?v=38&maj=' + Date.now();
+    location.href = url;
+  }
+  document.addEventListener('DOMContentLoaded', function(){ cacherMotDePasse(); setTimeout(verifierMiseAJour, 800); setTimeout(cacherMotDePasse, 2000); });
+  setTimeout(cacherMotDePasse, 1500); setTimeout(cacherMotDePasse, 3500); setTimeout(verifierMiseAJour, 2000);
+  // Observer les changements pour cacher immédiatement si le mot de passe réapparaît
+  try{
+    var obs = new MutationObserver(function(){ cacherMotDePasse(); });
+    obs.observe(document.documentElement, {childList:true, subtree:true});
+  }catch(e){}
+  var btn=document.getElementById('edubf-update-btn'); if(btn) btn.onclick=function(){ document.getElementById('edubf-update-modal').style.display='block'; };
+  var conf=document.getElementById('edubf-update-confirm'); if(conf) conf.onclick=appliquerMiseAJour;
+  var later=document.getElementById('edubf-update-later'); if(later) later.onclick=function(){ document.getElementById('edubf-update-modal').style.display='none'; document.getElementById('edubf-update-banner').style.display='none'; };
+})();
+</script>
 </body>
 </html>
