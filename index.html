@@ -4358,5 +4358,147 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
   };
 })();
 </script>
+
+<style id="edubf-v34-style">
+#edubf-emargement-print{ display:none; margin-top:26px; padding:14px 10px 8px; border:2px solid #222; border-radius:8px; page-break-inside:avoid; background:#fff; }
+#edubf-emargement-print h3{ text-align:center; margin:0 0 12px; font-size:15px; letter-spacing:1px; text-transform:uppercase; }
+#edubf-emargement-print .em-row{ display:flex; gap:12px; justify-content:space-between; }
+#edubf-emargement-print .em-box{ flex:1; border:1px solid #777; border-radius:6px; padding:8px; text-align:center; min-height:110px; }
+#edubf-emargement-print .em-box .em-role{ font-size:11px; color:#555; text-transform:uppercase; letter-spacing:.5px; }
+#edubf-emargement-print .em-box .em-nom{ font-weight:800; font-size:13px; margin:4px 0 2px; }
+#edubf-emargement-print .em-box img{ max-width:140px; max-height:58px; object-fit:contain; display:block; margin:4px auto 2px; }
+#edubf-emargement-print .em-ligne{ border-bottom:1px solid #222; height:34px; margin:8px 10px 4px; }
+#edubf-emargement-print .em-date{ font-size:11px; color:#555; }
+@media print{ #edubf-emargement-print{ display:block !important; } }
+#edubf-lock{ display:none; position:fixed; inset:0; z-index:9999999; background:#0f3d22; color:#fff; padding:24px 18px; overflow:auto; text-align:center; }
+#edubf-lock h2{ margin:10px 0 6px; } #edubf-lock p{ color:#d9f2e2; font-size:14px; }
+#edubf-lock input{ width:100%; max-width:340px; padding:13px; border-radius:10px; border:none; margin:6px 0; font-size:15px; text-align:center; }
+#edubf-lock button{ width:100%; max-width:340px; padding:13px; border-radius:10px; border:none; background:#ffcc00; font-weight:800; font-size:15px; margin-top:10px; cursor:pointer; }
+</style>
+<div id="edubf-emargement-print" aria-hidden="true"></div>
+<div id="edubf-lock"><div style="max-width:360px;margin:30px auto">
+<div style="font-size:44px">⭐</div><h2>EduBF - Application verrouillée</h2>
+<p>Cette application est protégée par licence.<br>1 Gmail = 1 téléphone = 12 mois.<br>Entre ton Gmail et ton code d'activation.</p>
+<input id="edubf-lock-gmail" type="email" placeholder="Ton Gmail">
+<input id="edubf-lock-code" type="text" placeholder="Code à 6 chiffres" maxlength="6">
+<button id="edubf-lock-btn">🔓 Déverrouiller</button>
+<p id="edubf-lock-msg" style="color:#ffcc00;font-weight:700"></p>
+<p style="font-size:12px;color:#a9d8bc">Pas de code ? Contacte le gestionnaire EduBF sur WhatsApp.<br>Ne partage jamais ton code.</p>
+</div></div>
+<script> // V34 - Emargement + Verrouillage fort
+(function(){
+  var SIG_KEY='edubf_signatures_v33';
+  function lireSig(){ try{ return JSON.parse(localStorage.getItem(SIG_KEY)||'{}'); }catch(e){ return {}; } }
+  // --- EMARGEMENT ---
+  function construireEmargement(){
+    var box=document.getElementById('edubf-emargement-print'); if(!box) return;
+    var d=lireSig();
+    var txt=(document.body.innerText||'').toLowerCase();
+    var title=(document.title||'').toLowerCase();
+    var estFiche = txt.indexOf('fiche de préparation')>=0 || txt.indexOf('fiche de preparation')>=0 || title.indexOf('fiche')>=0;
+    var liste = estFiche ? [{id:'ens1',role:'Enseignant'}] : [{id:'ens1',role:'Enseignant 1'},{id:'ens2',role:'Enseignant 2'}];
+    liste.push({id:'dir', role:'Directeur'});
+    var html='<h3>✍️ Émargement</h3><div class="em-row">';
+    liste.forEach(function(p){
+      var v=d[p.id]||{};
+      html+='<div class="em-box"><div class="em-role">'+p.role+'</div>'
+        +'<div class="em-nom">'+(v.nom||'Nom : ........................')+'</div>'
+        +(v.signature?'<img src="'+v.signature+'">':'<div class="em-ligne"></div>')
+        +(v.cachet?'<img src="'+v.cachet+'" style="max-width:110px;max-height:44px">':'')
+        +'<div class="em-date">Signature &nbsp;•&nbsp; Date : .... / .... / ........</div></div>';
+    });
+    html+='</div>';
+    box.innerHTML=html;
+    if(box.parentNode!==document.body) document.body.appendChild(box);
+  }
+  // Mettre l'émargement à jour avant chaque impression
+  var oldPrint=window.print;
+  window.print=function(){ try{ construireEmargement(); }catch(e){} setTimeout(function(){ oldPrint(); }, 60); };
+  document.addEventListener('click', function(e){
+    var b=e.target.closest?e.target.closest('button'):null;
+    if(b && /imprimer|pdf/i.test(b.textContent||'')){ try{ construireEmargement(); }catch(err){} }
+  }, true);
+  var vraiOpen=window.open;
+  window.open=function(){
+    var w=vraiOpen.apply(window, arguments);
+    try{ if(w){ setTimeout(function(){ try{ var d=lireSig(); var html='<div style="margin-top:26px;border:2px solid #222;border-radius:8px;padding:12px;text-align:center"><b>EMARGEMENT</b><br><br>'; [{id:'ens1',role:'Enseignant 1'},{id:'ens2',role:'Enseignant 2'},{id:'dir',role:'Directeur'}].forEach(function(p){ var v=d[p.id]||{}; html+='<span style="display:inline-block;width:30%;border:1px solid #777;border-radius:6px;padding:8px;margin:4px;vertical-align:top">'+p.role+'<br><b>'+(v.nom||'')+'</b><br>'+(v.signature?'<img src="'+v.signature+'" style="max-width:120px;max-height:50px">':'<br><br>')+'<br><span style="font-size:11px">Signature - Date</span></span>'; }); html+='</div>'; if(w.document&&w.document.body){ var div=w.document.createElement('div'); div.innerHTML=html; w.document.body.appendChild(div); } }catch(e){} }, 700); } }catch(e){}
+    return w;
+  };
+  document.addEventListener('DOMContentLoaded', construireEmargement);
+  setTimeout(construireEmargement, 2000);
+  // --- VERROUILLAGE FORT ---
+  function licenceValide(){
+    try{
+      // 1) Licence locale 12 mois
+      var lic=null; try{ lic=JSON.parse(localStorage.getItem('edubf_licence_12mois')||'null'); }catch(e){}
+      if(lic && lic.gmail && lic.fin){
+        var fin=new Date(lic.fin); if(!isNaN(fin) && fin>=new Date() && !lic.bloque) return true;
+      }
+      // 2) Ancienne licence
+      var old=null; try{ old=JSON.parse(localStorage.getItem('edubf_licence')||'null'); }catch(e){}
+      if(old && old.gmail && old.expire){ var f2=new Date(old.expire); if(!isNaN(f2) && f2>=new Date()) return true; }
+      // 3) Registre gestionnaire : ce téléphone doit y être Actif et non expiré
+      var reg=[]; try{ reg=JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]'); }catch(e){}
+      var dev=localStorage.getItem('edubf_device')||'';
+      for(var i=0;i<reg.length;i++){
+        var r=reg[i]; if(!r) continue;
+        if(r.statut==='Bloque') continue;
+        if(r.fin){ var fr=new Date(r.fin); if(!isNaN(fr) && fr<new Date()) continue; }
+        if(dev && r.device && r.device===dev) return true;
+        if(r.gmail && localStorage.getItem('edubf_gmail')===r.gmail) return true;
+      }
+    }catch(e){ return false; }
+    return false;
+  }
+  function verifierVerrou(){
+    // Si l'app est déjà en mode activation (écran Gmail+code visible), ne pas doubler le verrou
+    var dejaActivation = document.body && /code d.activation|entrez votre gmail|activation/i.test(document.body.innerText||'');
+    var lock=document.getElementById('edubf-lock');
+    if(licenceValide()){
+      if(lock) lock.style.display='none';
+      return true;
+    }
+    // Pas de licence valide : on montre le verrou, sauf si l'écran d'activation d'origine est déjà affiché
+    if(dejaActivation){
+      if(lock) lock.style.display='none';
+      return false;
+    }
+    if(lock) lock.style.display='block';
+    return false;
+  }
+  // Vérifier au démarrage et régulièrement (empêche de contourner en restant dans l'app)
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(verifierVerrou, 800); });
+  setTimeout(verifierVerrou, 1500); setTimeout(verifierVerrou, 4000);
+  setInterval(verifierVerrou, 15000);
+  // Déverrouillage : Gmail + code 6 chiffres doit exister dans le registre et correspondre au téléphone
+  var btn=document.getElementById('edubf-lock-btn');
+  if(btn) btn.onclick=function(){
+    var gmail=(document.getElementById('edubf-lock-gmail').value||'').trim().toLowerCase();
+    var code=(document.getElementById('edubf-lock-code').value||'').trim();
+    var msg=document.getElementById('edubf-lock-msg');
+    if(!gmail || !code){ msg.textContent='Mets ton Gmail et ton code.'; return; }
+    try{
+      var reg=JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]');
+      var trouve=null;
+      for(var i=0;i<reg.length;i++){ if(reg[i] && reg[i].gmail===gmail && String(reg[i].code)===String(code)){ trouve=reg[i]; break; } }
+      if(!trouve){ msg.textContent='Code incorrect pour ce Gmail. Vérifie avec le gestionnaire.'; return; }
+      if(trouve.statut==='Bloque'){ msg.textContent='Cette licence est bloquée. Contacte le gestionnaire.'; return; }
+      if(trouve.fin){ var f=new Date(trouve.fin); if(!isNaN(f) && f<new Date()){ msg.textContent='Cette licence est expirée.'; return; } }
+      // 1 Gmail = 1 téléphone : si le code est déjà lié à un autre téléphone, on bloque
+      var dev=localStorage.getItem('edubf_device')||'';
+      if(trouve.device && dev && trouve.device!==dev){ msg.textContent='Ce code est déjà utilisé sur un autre téléphone. 1 Gmail = 1 téléphone.'; return; }
+      // OK : on active
+      if(dev) trouve.device=dev;
+      localStorage.setItem('edubf_registre_12mois', JSON.stringify(reg));
+      localStorage.setItem('edubf_licence_12mois', JSON.stringify({gmail:gmail, code:code, fin:trouve.fin||'', debut:trouve.debut||'', device:dev}));
+      localStorage.setItem('edubf_gmail', gmail);
+      msg.textContent='Déverrouillé ✅ Bienvenue !'; msg.style.color='#fff';
+      setTimeout(function(){ location.reload(); }, 600);
+    }catch(e){ msg.textContent='Erreur. Réessaie.'; }
+  };
+  // Protéger le Gestionnaire : ne pas laisser voir le registre sans mot de passe gestionnaire
+  // (le mot de passe reste celui que tu connais déjà, on ne l'affiche jamais ici)
+})();
+</script>
 </body>
 </html>
