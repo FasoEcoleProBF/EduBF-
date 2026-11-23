@@ -3904,5 +3904,66 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){in
 setTimeout(function(){injectClient();injectGest();checkExp();},2000);
 })();
 </script>
+
+<script>
+// v28 - Licence solide simple comme collegue + Etablissement vide pour clients
+(function(){
+var SECRET='EduBF-12MOIS-2026';
+function h6(s){var a=5381;for(var i=0;i<s.length;i++){a=((a<<5)+a)+s.charCodeAt(i);a=a&0xffffffff;}return ('000000'+((a>>>0)%1000000)).slice(-6);}
+function codePour(g,d){return h6((g||'').toLowerCase()+'|'+(d||'').toUpperCase()+'|'+SECRET);}
+function getDev(){try{if(window.getDeviceId) return window.getDeviceId();}catch(e){} try{return localStorage.getItem('edubf_device')||'';}catch(e){return '';}}
+// 1. Etablissement : ne jamais imposer le nom du concepteur aux clients.
+// Si c'est une premiere installation (pas de reglages sauves), on vide le nom.
+try{
+  var deja=localStorage.getItem('edubf_pa')||localStorage.getItem('edubf_settings')||localStorage.getItem('PA');
+  var pno=document.getElementById('pno');
+  if(pno && pno.value==='EduBF - TRAORÉ Issiaka' && !deja){
+    pno.value=''; // le client mettra le nom de SA propre ecole
+    if(window.PA) window.PA.nom='';
+    if(window.IDENT) window.IDENT.nom='';
+  }
+}catch(e){}
+// 2. Remplacer l'ancien systeme 700 caracteres par le code court 6 chiffres
+window.validerLicence=function(src){
+  var ta=document.getElementById(src==='set'?'set-licence':'act-licence');
+  var errEl=document.getElementById(src==='set'?'set-lic-error':'act-error');
+  // On cherche le Gmail du client : d'abord dans l'ecran licence, sinon dans le champ Gmail du registre
+  var gmail='';
+  try{
+    var lg=document.getElementById('lic-gmail'); if(lg&&lg.value) gmail=lg.value.trim().toLowerCase();
+    if(!gmail){ var gg=document.getElementById('g12-gmail'); if(gg&&gg.value) gmail=gg.value.trim().toLowerCase(); }
+    if(!gmail){ var st=JSON.parse(localStorage.getItem('edubf_licence')||'null'); if(st&&st.gmail) gmail=st.gmail; }
+    if(!gmail){ var st2=JSON.parse(localStorage.getItem('edubf_licence_12mois')||'null'); if(st2&&st2.gmail) gmail=st2.gmail; }
+  }catch(e){}
+  var raw=(ta?ta.value:'').trim();
+  // Si l'utilisateur a tape un Gmail dans la zone elle-meme (format gmail:code), on le recupere
+  if(raw.indexOf('@')>=0 && raw.indexOf(':')>=0){ var parts=raw.split(':'); gmail=parts[0].trim().toLowerCase(); raw=parts[1].trim(); }
+  if(!raw){ if(errEl) errEl.textContent='Collez le code de 6 chiffres recu du gestionnaire.'; return; }
+  if(!gmail){ if(errEl) errEl.textContent='Mettez d abord votre Gmail dans l ecran de licence, puis le code de 6 chiffres.'; return; }
+  var attendu=codePour(gmail,getDev());
+  if(raw!==attendu){ if(errEl) errEl.textContent='Code incorrect pour '+gmail+' et cet appareil '+getDev()+'. Demandez le bon code de 6 chiffres au gestionnaire.'; return; }
+  var deb=new Date(); var exp=new Date(); exp.setMonth(exp.getMonth()+12);
+  try{
+    localStorage.setItem('edubf_licence_12mois', JSON.stringify({gmail:gmail, device:getDev(), deb:deb.toISOString(), exp:exp.getTime()}));
+    localStorage.setItem('edubf_licence', JSON.stringify({gmail:gmail, device:getDev(), date:deb.toISOString(), exp:exp.getTime(), duree:'12 mois'}));
+  }catch(e){}
+  if(errEl) errEl.textContent='Licence 12 mois activee pour '+gmail+' jusqu au '+exp.toLocaleDateString('fr-FR')+'.';
+  if(window.toast) toast('Licence 12 mois activee jusqu au '+exp.toLocaleDateString('fr-FR'),'#1a5c2a');
+  setTimeout(function(){ location.reload(); },900);
+};
+// 3. Simplifier la zone licence dans Parametres : cacher l'ancien texte 700 caracteres
+function simplifier(){
+  var tas=document.querySelectorAll('textarea[id*="licence"], textarea[id*="set-licence"]');
+  tas.forEach(function(ta){
+    var label=document.createElement('p');
+    label.style.cssText='font-size:13px;color:#1a5c2a;font-weight:700';
+    label.textContent='Licence simple 12 mois : mets ton Gmail dans l ecran de licence, puis ici ton code de 6 chiffres recu du gestionnaire. Exemple : 712467';
+    if(ta.parentNode && !document.getElementById('v28-aide')){ label.id='v28-aide'; ta.parentNode.insertBefore(label, ta); ta.placeholder='Ex : 712467  (6 chiffres seulement)'; }
+  });
+}
+document.addEventListener('DOMContentLoaded',function(){ setTimeout(simplifier,1000); });
+setTimeout(simplifier,2500);
+})();
+</script>
 </body>
 </html>
