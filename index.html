@@ -4193,5 +4193,170 @@ setTimeout(nettoyer,2500);
   });
 })();
 </script>
+
+<style id="edubf-v33-style">
+/* V33 - Vert plus clair + design propre */
+:root{ --edubf-green:#1a9a4a; --edubf-green-light:#e8f8ee; --edubf-green-soft:#2bb673; }
+header, .header, [class*="header"]{ background:linear-gradient(135deg,#1a9a4a,#2bb673) !important; }
+button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
+@media print{
+  body{ background:#fff !important; color:#111 !important; }
+  header, .header{ background:#1a9a4a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .no-print, #edubf-print-btn, #edubf-sig-panel, #edubf-sig-open{ display:none !important; }
+  #edubf-sig-print{ display:flex !important; }
+}
+#edubf-sig-print{ display:none; justify-content:space-between; gap:12px; margin-top:28px; padding-top:12px; border-top:1px solid #999; page-break-inside:avoid; }
+#edubf-sig-print .sig-box{ flex:1; text-align:center; font-size:12px; }
+#edubf-sig-print .sig-box img{ max-width:140px; max-height:70px; object-fit:contain; display:block; margin:4px auto; }
+#edubf-sig-panel{ display:none; position:fixed; inset:0; z-index:999999; background:rgba(0,0,0,.55); overflow:auto; padding:14px; }
+#edubf-sig-card{ background:#fff; border-radius:16px; max-width:520px; margin:20px auto; padding:18px; }
+#edubf-sig-card h2{ margin:0 0 6px; color:#157a3a; }
+#edubf-sig-card .person{ border:1px solid #ddd; border-radius:12px; padding:12px; margin:12px 0; }
+#edubf-sig-card label{ font-weight:700; font-size:13px; display:block; margin-top:8px; }
+#edubf-sig-card input[type=text]{ width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; }
+#edubf-sig-card input[type=file]{ margin-top:4px; }
+#edubf-sig-card .prev img{ max-width:150px; max-height:70px; margin:6px 6px 0 0; border:1px dashed #ccc; border-radius:6px; }
+#edubf-sig-card button{ padding:10px 14px; border-radius:10px; border:none; font-weight:700; cursor:pointer; }
+</style>
+<div id="edubf-sig-print" aria-hidden="true"></div>
+<div id="edubf-sig-panel"><div id="edubf-sig-card">
+<h2>✍️ Signatures &amp; Cachets</h2>
+<p style="font-size:13px;color:#555;margin:0">Ces signatures resteront enregistrées sur ce téléphone. Elles apparaîtront en bas des documents imprimés.</p>
+<div id="edubf-sig-forms"></div>
+<button id="edubf-sig-save" style="background:#1a9a4a;color:#fff;width:100%;margin-top:6px">✅ Enregistrer les signatures</button>
+<button id="edubf-sig-close" style="background:#eee;width:100%;margin-top:8px">Fermer</button>
+<p style="font-size:12px;color:#888;text-align:center;margin-top:10px">Astuce : prends la signature en photo sur fond blanc, bien cadrée.</p>
+</div></div>
+<script> // V33 - Signatures + Nom PDF + Vert clair
+(function(){
+  // 1) Enlever le bouton flottant qui embrouillait
+  setInterval(function(){ var b=document.getElementById('edubf-print-btn'); if(b) b.remove(); }, 1000);
+  // 2) Nom du document pour le PDF = titre de la page visible
+  function nomDocument(){
+    var t = (document.title||'').toLowerCase();
+    var bodyText = document.body ? document.body.innerText||'' : '';
+    // Chercher un titre visible en haut
+    var h = document.querySelector('h1, h2');
+    var ht = h ? h.innerText||'' : '';
+    var txt = ht + ' ' + bodyText.slice(0,3000);
+    var low = txt.toLowerCase();
+    if(low.indexOf('fiche')>=0 && low.indexOf('préparation')>=0) return 'Fiche de Preparation - EduBF';
+    if(low.indexOf('synoptique')>=0) return 'Tableau Synoptique - EduBF';
+    if(low.indexOf('bulletin')>=0) return 'Bulletin - EduBF';
+    if(low.indexOf('examen blanc')>=0) return 'Examen Blanc - EduBF';
+    if(low.indexOf('certificat')>=0) return 'Certificat - EduBF';
+    if(low.indexOf('carte scolaire')>=0) return 'Carte Scolaire - EduBF';
+    if(low.indexOf('liste alphab')>=0) return 'Liste Alphabetique - EduBF';
+    if(low.indexOf('absence')>=0) return 'Absences - EduBF';
+    if(low.indexOf('résultat')>=0 || low.indexOf('resultat')>=0) return 'Resultats - EduBF';
+    if(low.indexOf('fin d')>=0) return 'Fin d Annee - EduBF';
+    return 'Document - EduBF';
+  }
+  var vraiPrint = window.print.bind(window);
+  window.print = function(){
+    try{ document.title = nomDocument(); }catch(e){}
+    try{ construireBlocSignatures(); }catch(e){}
+    setTimeout(function(){ vraiPrint(); }, 80);
+  };
+  // Aussi quand on utilise le bouton Imprimer de l'app (qui appelle OP / window.open) : on met le titre avant
+  document.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('button') : null;
+    if(b && /imprimer|pdf/i.test(b.textContent||'')){
+      try{ document.title = nomDocument(); construireBlocSignatures(); }catch(err){}
+    }
+  }, true);
+  // 3) Signatures
+  var KEY='edubf_signatures_v33';
+  function lire(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+  function sauver(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+  var PERSONS=[{id:'ens1',label:'Enseignant 1'},{id:'ens2',label:'Enseignant 2'},{id:'dir',label:'Directeur'}];
+  function construireForm(){
+    var wrap=document.getElementById('edubf-sig-forms'); if(!wrap) return;
+    var data=lire(); var html='';
+    PERSONS.forEach(function(p){
+      var v=data[p.id]||{};
+      html+='<div class="person"><b>'+p.label+'</b>'
+        +'<label>Nom complet</label><input type="text" id="sig-nom-'+p.id+'" value="'+(v.nom||'').replace(/"/g,'')+'" placeholder="Ex : TRAORE Issiaka">'
+        +'<label>Signature (photo)</label><input type="file" accept="image/*" id="sig-file-'+p.id+'">'
+        +'<div class="prev" id="sig-prev-'+p.id+'">'+(v.signature?'<img src="'+v.signature+'">':'')+'</div>'
+        +'<label>Cachet (photo)</label><input type="file" accept="image/*" id="cachet-file-'+p.id+'">'
+        +'<div class="prev" id="cachet-prev-'+p.id+'">'+(v.cachet?'<img src="'+v.cachet+'">':'')+'</div>'
+        +'<button type="button" data-effacer="'+p.id+'" style="background:#fff;border:1px solid #cc0000;color:#cc0000;margin-top:8px">Effacer '+p.label+'</button>'
+        +'</div>';
+    });
+    wrap.innerHTML=html;
+    PERSONS.forEach(function(p){
+      var f1=document.getElementById('sig-file-'+p.id);
+      var f2=document.getElementById('cachet-file-'+p.id);
+      function readFile(inp, cb){
+        inp.addEventListener('change', function(){
+          var file=inp.files && inp.files[0]; if(!file) return;
+          var r=new FileReader(); r.onload=function(){ cb(r.result); }; r.readAsDataURL(file);
+        });
+      }
+      readFile(f1, function(url){ var d=lire(); d[p.id]=d[p.id]||{}; d[p.id].signature=url; sauver(d); document.getElementById('sig-prev-'+p.id).innerHTML='<img src="'+url+'">'; });
+      readFile(f2, function(url){ var d=lire(); d[p.id]=d[p.id]||{}; d[p.id].cachet=url; sauver(d); document.getElementById('cachet-prev-'+p.id).innerHTML='<img src="'+url+'">'; });
+    });
+    wrap.querySelectorAll('[data-effacer]').forEach(function(btn){
+      btn.onclick=function(){ var d=lire(); delete d[btn.getAttribute('data-effacer')]; sauver(d); construireForm(); construireBlocSignatures(); };
+    });
+  }
+  function construireBlocSignatures(){
+    var box=document.getElementById('edubf-sig-print'); if(!box) return;
+    var d=lire();
+    var estFiche = (document.body.innerText||'').toLowerCase().indexOf('fiche de préparation')>=0 || (document.title||'').toLowerCase().indexOf('fiche')>=0;
+    // Pour les fiches : seulement Enseignant 1 + Directeur. Sinon : les 3.
+    var liste = estFiche ? ['ens1','dir'] : ['ens1','ens2','dir'];
+    var labels={ens1:'Enseignant 1', ens2:'Enseignant 2', dir:'Directeur'};
+    var html='';
+    liste.forEach(function(id){
+      var v=d[id]||{}; if(!v.signature && !v.cachet && !v.nom) return;
+      html+='<div class="sig-box"><div><b>'+(v.nom||labels[id])+'</b><br><span>'+labels[id]+'</span></div>'
+        +(v.signature?'<img src="'+v.signature+'">':'<div style="height:50px"></div>')
+        +(v.cachet?'<img src="'+v.cachet+'">':'')
+        +'</div>';
+    });
+    box.innerHTML=html;
+    // Si aucune signature, on ne montre rien
+    box.style.display = html ? 'flex' : 'none';
+    // Le bloc doit être à la fin du document imprimé : on le déplace à la fin du body pour l'impression
+    if(html && box.parentNode!==document.body) document.body.appendChild(box);
+    return html;
+  }
+  // Bouton d'ouverture dans Accès rapide
+  function ajouterBouton(){
+    if(document.getElementById('edubf-sig-open')) return;
+    var zones = Array.from(document.querySelectorAll('button, a, div'));
+    var cible = zones.find(function(el){ return (el.textContent||'').trim()==='Paramètres' || (el.textContent||'').trim().indexOf('Paramètres')>=0; });
+    if(cible && cible.parentNode){
+      var b=document.createElement('button'); b.id='edubf-sig-open'; b.textContent='✍️ Signatures & Cachets';
+      b.style.cssText='padding:10px 14px;border-radius:999px;border:1px solid #1a9a4a;background:#e8f8ee;color:#157a3a;font-weight:700;margin:6px;cursor:pointer';
+      b.onclick=function(){ construireForm(); document.getElementById('edubf-sig-panel').style.display='block'; };
+      cible.parentNode.insertBefore(b, cible.nextSibling);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){ ajouterBouton(); construireBlocSignatures(); });
+  setTimeout(function(){ ajouterBouton(); construireBlocSignatures(); }, 2000);
+  setTimeout(function(){ ajouterBouton(); construireBlocSignatures(); }, 4000);
+  var btnSave=document.getElementById('edubf-sig-save');
+  if(btnSave) btnSave.onclick=function(){
+    var d=lire();
+    PERSONS.forEach(function(p){ d[p.id]=d[p.id]||{}; var inp=document.getElementById('sig-nom-'+p.id); if(inp) d[p.id].nom=inp.value.trim(); });
+    sauver(d); construireBlocSignatures(); alert('Signatures enregistrées ✅ Elles apparaîtront en bas de tes documents imprimés.'); document.getElementById('edubf-sig-panel').style.display='none';
+  };
+  var btnClose=document.getElementById('edubf-sig-close');
+  if(btnClose) btnClose.onclick=function(){ document.getElementById('edubf-sig-panel').style.display='none'; };
+  // Si l'app ouvre une nouvelle fenêtre pour imprimer (OP), injecter les signatures dans cette fenêtre aussi
+  var vraiOpen = window.open;
+  window.open = function(){
+    var w = vraiOpen.apply(window, arguments);
+    try{
+      if(w){ setTimeout(function(){ try{ var d=lire(); var html=''; PERSONS.forEach(function(p){ var v=d[p.id]||{}; if(v.signature||v.cachet) html+='<div style="display:inline-block;text-align:center;margin:10px"><b>'+(v.nom||'')+'</b><br>'+(v.signature?'<img src="'+v.signature+'" style="max-width:140px;max-height:70px;display:block;margin:auto">':'')+(v.cachet?'<img src="'+v.cachet+'" style="max-width:140px;max-height:70px;display:block;margin:auto">':'')+'</div>'; }); if(html && w.document && w.document.body){ var div=w.document.createElement('div'); div.style.cssText='margin-top:30px;border-top:1px solid #999;padding-top:12px;text-align:center'; div.innerHTML=html; w.document.body.appendChild(div); } }catch(e){} }, 600); }
+    }catch(e){}
+    return w;
+  };
+})();
+</script>
 </body>
 </html>
