@@ -393,111 +393,7 @@ function FP2_imprimer(){
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
   var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
-  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'
-<script> // v32 - Supprimer gestionnaire + Hors-connexion + Impression
-(function(){
-  // --- 1. SUPPRIMER / BLOQUER dans le registre 12 mois ---
-  window.EDUBF_supprimerClient = function(gmail){
-    if(!confirm('Supprimer definitivement '+gmail+' ?\nElle devra redemander une nouvelle licence.')) return;
-    try{
-      var reg = JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]');
-      reg = reg.filter(function(x){return x.gmail!==gmail;});
-      localStorage.setItem('edubf_registre_12mois', JSON.stringify(reg));
-      var old = JSON.parse(localStorage.getItem('edubf_licences_gestion')||'[]');
-      old = old.filter(function(x){return x.gmail!==gmail;});
-      localStorage.setItem('edubf_licences_gestion', JSON.stringify(old));
-    }catch(e){}
-    // rafraichir l'affichage si la fonction existe
-    try{ if(window.afficherReg) afficherReg(); }catch(e){}
-    location.reload();
-  };
-  window.EDUBF_bloquerClient = function(gmail){
-    try{
-      var reg = JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]');
-      reg.forEach(function(x){ if(x.gmail===gmail){ x.statut = (x.statut==='Bloque'?'Actif':'Bloque'); }});
-      localStorage.setItem('edubf_registre_12mois', JSON.stringify(reg));
-    }catch(e){}
-    location.reload();
-  };
-  // Injecter les boutons dans chaque ligne du registre, meme si le code d'origine ne les a pas
-  function injecterBoutons(){
-    var el = document.getElementById('g12-registre');
-    if(!el) return;
-    el.querySelectorAll('div').forEach(function(div){
-      var b = div.querySelector('b');
-      if(!b || div.dataset.v32) return;
-      var gmail = b.textContent.trim();
-      if(gmail.indexOf('@')<0) return;
-      div.dataset.v32 = '1';
-      var wrap = document.createElement('div');
-      wrap.style.cssText = 'margin-top:8px;display:flex;gap:8px;flex-wrap:wrap';
-      var btnDel = document.createElement('button');
-      btnDel.textContent = '🗑️ Supprimer';
-      btnDel.style.cssText = 'padding:8px 12px;border-radius:8px;border:1px solid #cc0000;background:#fff;color:#cc0000;font-weight:700;cursor:pointer';
-      btnDel.onclick = function(){ window.EDUBF_supprimerClient(gmail); };
-      var btnBlo = document.createElement('button');
-      var estBloque = div.textContent.indexOf('Bloque')>=0;
-      btnBlo.textContent = estBloque ? '✅ Débloquer' : '🔒 Bloquer';
-      btnBlo.style.cssText = 'padding:8px 12px;border-radius:8px;border:1px solid #333;background:#eee;font-weight:700;cursor:pointer';
-      btnBlo.onclick = function(){ window.EDUBF_bloquerClient(gmail); };
-      wrap.appendChild(btnDel); wrap.appendChild(btnBlo);
-      div.appendChild(wrap);
-    });
-  }
-  // Observer les changements du registre
-  var obs = new MutationObserver(injecterBoutons);
-  document.addEventListener('DOMContentLoaded', function(){
-    var el = document.getElementById('g12-registre');
-    if(el) obs.observe(el, {childList:true, subtree:true});
-    setTimeout(injecterBoutons, 1500); setTimeout(injecterBoutons, 3000);
-  });
-  setTimeout(injecterBoutons, 2500); setTimeout(injecterBoutons, 5000);
-
-  // --- 2. HORS-CONNEXION : Service Worker cache + bandeau ---
-  // On enregistre un Service Worker qui met la page en cache a la 1ere ouverture avec Internet.
-  // Apres, meme sans Internet, la page s'ouvre depuis le cache.
-  try{
-    if('serviceWorker' in navigator){
-      var swCode = "var CACHE='edubf-v32'; self.addEventListener('install',function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll([location.href, './']); }).catch(function(){})); self.skipWaiting(); }); self.addEventListener('activate',function(e){ e.waitUntil(self.clients.claim()); }); self.addEventListener('fetch',function(e){ if(e.request.method!=='GET') return; e.respondWith(caches.match(e.request).then(function(r){ return r || fetch(e.request).then(function(res){ var copy=res.clone(); caches.open(CACHE).then(function(c){ c.put(e.request, copy); }); return res; }).catch(function(){ return caches.match(location.href); }); })); });";
-      var blob = new Blob([swCode], {type:'text/javascript'});
-      var swUrl = URL.createObjectURL(blob);
-      navigator.serviceWorker.register(swUrl).catch(function(){});
-    }
-  }catch(e){}
-  function bandeauOffline(){
-    var existe = document.getElementById('edubf-offline-banner');
-    if(!navigator.onLine){
-      if(!existe){
-        var d=document.createElement('div'); d.id='edubf-offline-banner';
-        d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999999;background:#ff9800;color:#fff;text-align:center;padding:8px;font-weight:700;font-size:13px';
-        d.textContent='📴 Hors connexion — Tu peux travailler, tes données sont gardées sur ce téléphone.';
-        document.body.appendChild(d);
-      }
-    } else if(existe){ existe.remove(); }
-  }
-  window.addEventListener('online', bandeauOffline); window.addEventListener('offline', bandeauOffline);
-  document.addEventListener('DOMContentLoaded', bandeauOffline); setTimeout(bandeauOffline, 1500);
-
-  // --- 3. IMPRESSION : bouton Télécharger / Imprimer qui marche dans l'appli ---
-  window.EDUBF_imprimerPage = function(){
-    // On ouvre la page actuelle dans une nouvelle fenetre pour imprimer, sinon on utilise window.print
-    try{ window.print(); }catch(e){ alert('Touche les 3 points en haut, puis Partager > Imprimer, ou Enregistrer en PDF.'); }
-  };
-  // Ajouter un bouton flottant Imprimer sur les pages de fiches si pas deja present
-  document.addEventListener('DOMContentLoaded', function(){
-    setTimeout(function(){
-      if(document.getElementById('edubf-print-btn')) return;
-      var btn=document.createElement('button'); btn.id='edubf-print-btn';
-      btn.textContent='🖨️ Imprimer / PDF';
-      btn.style.cssText='position:fixed;bottom:90px;right:12px;z-index:99999;background:#0a6b2e;color:#fff;border:none;padding:12px 14px;border-radius:999px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer';
-      btn.onclick=function(){ window.EDUBF_imprimerPage(); };
-      document.body.appendChild(btn);
-    }, 2000);
-  });
-})();
-</script>
-</body>
-</html>';
+  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'</body></html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
@@ -4145,7 +4041,7 @@ setTimeout(nettoyer,2500);
 </script>
 
 <script>
-// v32 - FIX DEFINITIF NOM ETABLISSEMENT : ton nom ne doit plus jamais etre le nom de l'ecole
+// v31 - FIX DEFINITIF NOM ETABLISSEMENT : ton nom ne doit plus jamais etre le nom de l'ecole
 (function(){
   // 1. La licence ne doit PLUS imposer le nom de l'ecole. L'ecole, c'est le client qui la choisit.
   // On remplace les 2 fonctions qui ecrasaient PA.nom avec LIC.n
@@ -4208,6 +4104,93 @@ setTimeout(nettoyer,2500);
     if(pno && pno.readOnly){ pno.readOnly=false; pno.removeAttribute('readonly'); pno.style.background=''; pno.style.color=''; }
     if(pno && pno.value==='EduBF - TRAORÉ Issiaka'){ pno.value=''; }
   }, 1500);
+})();
+</script>
+
+<script> // v32 CORRIGEE - Supprimer + Hors-connexion + Impression
+(function(){
+  window.EDUBF_supprimerClient = function(gmail){
+    if(!confirm('Supprimer definitivement '+gmail+' ?')) return;
+    try{
+      var reg = JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]');
+      reg = reg.filter(function(x){return x.gmail!==gmail;});
+      localStorage.setItem('edubf_registre_12mois', JSON.stringify(reg));
+      var old = JSON.parse(localStorage.getItem('edubf_licences_gestion')||'[]');
+      old = old.filter(function(x){return x.gmail!==gmail;});
+      localStorage.setItem('edubf_licences_gestion', JSON.stringify(old));
+    }catch(e){}
+    location.reload();
+  };
+  window.EDUBF_bloquerClient = function(gmail){
+    try{
+      var reg = JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]');
+      reg.forEach(function(x){ if(x.gmail===gmail){ x.statut = (x.statut==='Bloque'?'Actif':'Bloque'); }});
+      localStorage.setItem('edubf_registre_12mois', JSON.stringify(reg));
+    }catch(e){}
+    location.reload();
+  };
+  function injecterBoutons(){
+    var el = document.getElementById('g12-registre');
+    if(!el) return;
+    el.querySelectorAll('div').forEach(function(div){
+      var b = div.querySelector('b');
+      if(!b || div.dataset.v32) return;
+      var gmail = b.textContent.trim();
+      if(gmail.indexOf('@')<0) return;
+      div.dataset.v32 = '1';
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'margin-top:8px;display:flex;gap:8px;flex-wrap:wrap';
+      var btnDel = document.createElement('button');
+      btnDel.textContent = 'Supprimer';
+      btnDel.style.cssText = 'padding:8px 12px;border-radius:8px;border:1px solid #cc0000;background:#fff;color:#cc0000;font-weight:700;cursor:pointer';
+      btnDel.onclick = function(){ window.EDUBF_supprimerClient(gmail); };
+      var btnBlo = document.createElement('button');
+      var estBloque = div.textContent.indexOf('Bloque')>=0;
+      btnBlo.textContent = estBloque ? 'Debloquer' : 'Bloquer';
+      btnBlo.style.cssText = 'padding:8px 12px;border-radius:8px;border:1px solid #333;background:#eee;font-weight:700;cursor:pointer';
+      btnBlo.onclick = function(){ window.EDUBF_bloquerClient(gmail); };
+      wrap.appendChild(btnDel); wrap.appendChild(btnBlo);
+      div.appendChild(wrap);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.getElementById('g12-registre');
+    if(el){ var obs = new MutationObserver(injecterBoutons); obs.observe(el, {childList:true, subtree:true}); }
+    setTimeout(injecterBoutons, 1500); setTimeout(injecterBoutons, 3000);
+  });
+  setTimeout(injecterBoutons, 2500); setTimeout(injecterBoutons, 5000);
+  try{
+    if('serviceWorker' in navigator){
+      var swCode = "var CACHE='edubf-v32'; self.addEventListener('install',function(e){ e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll([location.href]); }).catch(function(){})); self.skipWaiting(); }); self.addEventListener('activate',function(e){ e.waitUntil(self.clients.claim()); }); self.addEventListener('fetch',function(e){ if(e.request.method!=='GET') return; e.respondWith(caches.match(e.request).then(function(r){ return r || fetch(e.request).then(function(res){ var copy=res.clone(); caches.open(CACHE).then(function(c){ c.put(e.request, copy); }); return res; }).catch(function(){ return caches.match(location.href); }); })); });";
+      var blob = new Blob([swCode], {type:'text/javascript'});
+      var swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(function(){});
+    }
+  }catch(e){}
+  function bandeauOffline(){
+    var existe = document.getElementById('edubf-offline-banner');
+    if(!navigator.onLine){
+      if(!existe){
+        var d=document.createElement('div'); d.id='edubf-offline-banner';
+        d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999999;background:#ff9800;color:#fff;text-align:center;padding:8px;font-weight:700;font-size:13px';
+        d.textContent='Hors connexion - Tu peux travailler, tes donnees sont gardees sur ce telephone.';
+        document.body.appendChild(d);
+      }
+    } else if(existe){ existe.remove(); }
+  }
+  window.addEventListener('online', bandeauOffline); window.addEventListener('offline', bandeauOffline);
+  document.addEventListener('DOMContentLoaded', bandeauOffline); setTimeout(bandeauOffline, 1500);
+  window.EDUBF_imprimerPage = function(){ try{ window.print(); }catch(e){ alert('Touche les 3 points, puis Partager > Imprimer.'); } };
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      if(document.getElementById('edubf-print-btn')) return;
+      var btn=document.createElement('button'); btn.id='edubf-print-btn';
+      btn.textContent='Imprimer / PDF';
+      btn.style.cssText='position:fixed;bottom:90px;right:12px;z-index:99999;background:#0a6b2e;color:#fff;border:none;padding:12px 14px;border-radius:999px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer';
+      btn.onclick=function(){ window.EDUBF_imprimerPage(); };
+      document.body.appendChild(btn);
+    }, 2000);
+  });
 })();
 </script>
 </body>
