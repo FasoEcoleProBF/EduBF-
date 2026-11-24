@@ -151,10 +151,10 @@ hr{border:none;border-top:1px solid var(--bd);margin:10px 0}
 </style>
 <style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head>
 <body>
-<!-- LICENCE EduBF v46 - UNIQUE : 1 compte = 1 téléphone, validation gestionnaire -->
+<!-- LICENCE EduBF v47 - NOUVEAU CODE GESTIONNAIRE : 1 compte = 1 téléphone, validation gestionnaire -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
-    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBF v46 - UNIQUE — Licence</h2>
+    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBF v47 - NOUVEAU CODE GESTIONNAIRE — Licence</h2>
     <p style="text-align:center;font-size:13px;color:#555;margin:0 0 14px">1 compte = 1 téléphone. Seul le gestionnaire valide.</p>
     <div id="licence-msg" style="display:none;background:#ffe9e9;border:1px solid #cc0000;color:#a00;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
     <label style="font-weight:700;font-size:13px">Gmail de l'enseignant</label>
@@ -163,14 +163,14 @@ hr{border:none;border-top:1px solid var(--bd);margin:10px 0}
     <input id="lic-mdp" type="password" placeholder="Au moins 6 caractères" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
     <label style="font-weight:700;font-size:13px">Code du gestionnaire</label>
     <input id="lic-code" type="text" placeholder="Code donné par le gestionnaire" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
-    <p style="font-size:12px;color:#666;margin:0 0 12px">Demande ton code au gestionnaire. Sans son code, EduBF v46 - UNIQUE ne s'ouvre pas.</p>
+    <p style="font-size:12px;color:#666;margin:0 0 12px">Demande ton code au gestionnaire. Sans son code, EduBF v47 - NOUVEAU CODE GESTIONNAIRE ne s'ouvre pas.</p>
     <button onclick="LIC_valider()" style="width:100%;background:#0a6b2e;color:#fff;border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer">✅ Valider ma licence</button>
     <p id="lic-info" style="font-size:12px;color:#666;text-align:center;margin-top:12px"></p>
   </div>
 </div>
 <script>
 (function(){
-  var CODE_GESTIONNAIRE='EDUBF-2026';
+  var CODE_GESTIONNAIRE=(function(){try{return localStorage.getItem('edubf_manager_secret')||'';}catch(e){return '';}})();
   function deviceId(){var d=null;try{d=localStorage.getItem('edubf_device');}catch(e){} if(!d){d='TEL-'+Math.random().toString(36).slice(2,10).toUpperCase();try{localStorage.setItem('edubf_device',d);}catch(e){}} return d;}
   function msg(txt){var m=document.getElementById('licence-msg');if(m){m.style.display='block';m.textContent=txt;}}
   window.LIC_valider=function(){
@@ -686,20 +686,20 @@ FP2_renderAll();FP2_generer();
     </div>
     <div id="gest-zone" style="display:none">
       <div class="fg"><label>Gmail enseignant à valider</label><input type="text" id="gest-gmail" placeholder="enseignant@gmail.com"/></div>
-      <button class="bp2" onclick="GEST_ajouter()">✅ Valider cet enseignant — lui donner le code EDUBF-2026</button>
+      <button class="bp2" onclick="GEST_ajouter()">✅ Valider cet enseignant — lui donner le code TON CODE SECRET</button>
       <div id="gest-liste" style="margin-top:12px"></div>
-      <p style="font-size:12px;color:#666;margin-top:10px">Code à donner à l'enseignant après validation : <b>EDUBF-2026</b><br>1 compte = 1 téléphone. Pour débloquer un enseignant qui a changé de téléphone, touche <b>Débloquer</b> dans la liste.</p>
+      <p style="font-size:12px;color:#666;margin-top:10px">Code à donner à l'enseignant après validation : <b>TON CODE SECRET</b><br>1 compte = 1 téléphone. Pour débloquer un enseignant qui a changé de téléphone, touche <b>Débloquer</b> dans la liste.</p>
       <button class="bp2" onclick="GEST_fermer()" style="background:#666">🔒 Fermer le Gestionnaire</button>
     </div>
   </div>
   <script>
   function GEST_lire(){try{return JSON.parse(localStorage.getItem('edubf_licences_gestion')||'[]');}catch(e){return [];}}
   function GEST_ecrire(l){try{localStorage.setItem('edubf_licences_gestion',JSON.stringify(l));}catch(e){}}
-  function GEST_ouvrir(){var m=document.getElementById('gest-mdp').value||'';if(m!=='GESTION-2027-EDUBF'){toast('⚠️ Mot de passe gestionnaire incorrect','#cc0000');return;}document.getElementById('gest-login').style.display='none';document.getElementById('gest-zone').style.display='block';GEST_afficher();toast('✅ Gestionnaire ouvert','#1a5c2a');}
+  function GEST_ouvrir(){var m=document.getElementById('gest-mdp').value||'';if(m!==(function(){try{return localStorage.getItem('edubf_manager_secret')||'';}catch(e){return '';}})()){toast('⚠️ Mot de passe gestionnaire incorrect','#cc0000');return;}document.getElementById('gest-login').style.display='none';document.getElementById('gest-zone').style.display='block';GEST_afficher();toast('✅ Gestionnaire ouvert','#1a5c2a');}
   function GEST_fermer(){document.getElementById('gest-zone').style.display='none';document.getElementById('gest-login').style.display='block';document.getElementById('gest-mdp').value='';}
-  function GEST_ajouter(){var g=(document.getElementById('gest-gmail').value||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)){toast('⚠️ Mets un Gmail valide','#cc0000');return;}var l=GEST_lire();if(l.some(function(x){return x.gmail===g;})){toast('⚠️ Déjà validé','#cc0000');return;}l.push({gmail:g,code:'EDUBF-2026',date:new Date().toLocaleDateString('fr-FR'),bloque:false});GEST_ecrire(l);document.getElementById('gest-gmail').value='';GEST_afficher();toast('✅ '+g+' validé — donne-lui le code EDUBF-2026','#1a5c2a');}
+  function GEST_ajouter(){var g=(document.getElementById('gest-gmail').value||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)){toast('⚠️ Mets un Gmail valide','#cc0000');return;}var l=GEST_lire();if(l.some(function(x){return x.gmail===g;})){toast('⚠️ Déjà validé','#cc0000');return;}l.push({gmail:g,code:'TON CODE SECRET',date:new Date().toLocaleDateString('fr-FR'),bloque:false});GEST_ecrire(l);document.getElementById('gest-gmail').value='';GEST_afficher();toast('✅ '+g+' validé — donne-lui le code TON CODE SECRET','#1a5c2a');}
   function GEST_basculer(g){var l=GEST_lire();l.forEach(function(x){if(x.gmail===g)x.bloque=!x.bloque;});GEST_ecrire(l);GEST_afficher();}
-  function GEST_afficher(){var l=GEST_lire();var z=document.getElementById('gest-liste');if(!z)return;if(!l.length){z.innerHTML='<p style="font-size:13px;color:#666">Aucun enseignant validé pour le moment.</p>';return;}z.innerHTML=l.map(function(x){return '<div style="border:1px solid #ccc;border-radius:10px;padding:10px;margin-bottom:8px"><b>'+x.gmail+'</b><br><small>Validé le '+x.date+' — Code : EDUBF-2026 — '+(x.bloque?'🔴 Bloqué':'🟢 Actif')+'</small><br><button onclick="GEST_basculer(\''+x.gmail+'\')" style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid #333;background:#eee;font-weight:700;cursor:pointer">'+(x.bloque?'✅ Débloquer':'🔒 Bloquer')+'</button></div>';}).join('');}
+  function GEST_afficher(){var l=GEST_lire();var z=document.getElementById('gest-liste');if(!z)return;if(!l.length){z.innerHTML='<p style="font-size:13px;color:#666">Aucun enseignant validé pour le moment.</p>';return;}z.innerHTML=l.map(function(x){return '<div style="border:1px solid #ccc;border-radius:10px;padding:10px;margin-bottom:8px"><b>'+x.gmail+'</b><br><small>Validé le '+x.date+' — Code : TON CODE SECRET — '+(x.bloque?'🔴 Bloqué':'🟢 Actif')+'</small><br><button onclick="GEST_basculer(\''+x.gmail+'\')" style="margin-top:6px;padding:8px 12px;border-radius:8px;border:1px solid #333;background:#eee;font-weight:700;cursor:pointer">'+(x.bloque?'✅ Débloquer':'🔒 Bloquer')+'</button></div>';}).join('');}
   </script>
   <div class="card"><h3>🏫 Établissement</h3>
     <div class="fg"><label>Nom *</label><input type="text" id="pno" placeholder="École Primaire Publique de..."/></div>
@@ -1080,7 +1080,7 @@ function demanderCodeWhatsApp(){
   var url='https://wa.me/22676720728?text='+encodeURIComponent('Bonjour, je souhaite activer EduBF. Mon code appareil : '+getDeviceId());
   var w=window.open(url,'_blank'); if(!w) location.href=url;
 }
-function showActivationScreen_DESACTIVE(err){ /* ANCIEN SYSTEME SUPPRIME : ne crée plus aucun écran Activation requise. Seule Licence = licence-ecran Gmail + EDUBF-2026. */ return; }
+function showActivationScreen_DESACTIVE(err){ /* ANCIEN SYSTEME SUPPRIME : ne crée plus aucun écran Activation requise. Seule Licence = licence-ecran Gmail + TON CODE SECRET. */ return; }
 function validerLicence(src){
   var ta=document.getElementById(src==='set'?'set-licence':'act-licence');
   var errEl=document.getElementById(src==='set'?'set-lic-error':'act-error');
@@ -4009,17 +4009,17 @@ setTimeout(simplifier,2500);
 </script>
 
 <script>
-// v30 - Nettoyage : enlever vieux EDUBF-2026, header = EduBF seul, ecole du client = la sienne
+// v30 - Nettoyage : enlever vieux TON CODE SECRET, header = EduBF seul, ecole du client = la sienne
 (function(){
 function nettoyer(){
-  // 1. Cacher l'ancien bouton Valider cet enseignant EDUBF-2026 + son Gmail + son texte
+  // 1. Cacher l'ancien bouton Valider cet enseignant TON CODE SECRET + son Gmail + son texte
   try{
     var btn=document.querySelector('button[onclick="GEST_ajouter()"]');
     if(btn){ btn.style.display='none'; }
     var gg=document.getElementById('gest-gmail'); if(gg){ gg.style.display='none'; var lab=gg.closest('.fg'); if(lab) lab.style.display='none'; }
-    // Cacher le paragraphe qui dit "Code a donner : EDUBF-2026" dans gest-zone
+    // Cacher le paragraphe qui dit "Code a donner : TON CODE SECRET" dans gest-zone
     var gz=document.getElementById('gest-zone');
-    if(gz){ gz.querySelectorAll('p').forEach(function(p){ if(p.textContent.indexOf('EDUBF-2026')>=0 && p.textContent.indexOf('Registre')<0) p.style.display='none'; }); }
+    if(gz){ gz.querySelectorAll('p').forEach(function(p){ if(p.textContent.indexOf('TON CODE SECRET')>=0 && p.textContent.indexOf('Registre')<0) p.style.display='none'; }); }
   }catch(e){}
   // 2. En haut a droite, on montre seulement "EduBF", pas le nom de l'etablissement
   // Le nom de l'ecole reste dans Parametres et dans les documents, pas dans le bandeau du haut
@@ -5169,6 +5169,39 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
   setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
   setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
+})();
+</script>
+
+<script id="edubf-v47-setup">
+(function(){
+  function needSetup(){ try{ return !localStorage.getItem('edubf_manager_secret'); }catch(e){ return true; } }
+  function showSetup(){
+    if(document.getElementById('edubf-setup')) return;
+    var d=document.createElement('div'); d.id='edubf-setup';
+    d.style.cssText='position:fixed;inset:0;z-index:9999999;background:#0f3d22;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px';
+    d.innerHTML='<div style="background:#fff;color:#111;border-radius:16px;padding:22px;max-width:420px;width:100%"><h2 style="margin:0;color:#0f3d22">🔒 Nouveau code gestionnaire</h2><p style="font-size:14px;color:#444;margin-top:10px">C\'est la premiere ouverture de la v47. <b>Cree TON nouveau code secret.</b><br>Retiens-le. Ne le donne a personne. Les enseignants n\'en ont pas besoin : eux utilisent Gmail + code a 6 chiffres.</p><label style="font-size:13px;font-weight:700">Ton nouveau code secret (8 lettres/chiffres minimum)</label><input id="edubf-new-secret" type="text" placeholder="Ex : ton mot secret a toi" style="width:100%;padding:13px;border:2px solid #0f3d22;border-radius:10px;font-size:16px;margin:8px 0"><label style="font-size:13px;font-weight:700">Retape-le pour confirmer</label><input id="edubf-new-secret2" type="text" placeholder="Retape ton code" style="width:100%;padding:13px;border:2px solid #0f3d22;border-radius:10px;font-size:16px;margin:8px 0"><p id="edubf-setup-msg" style="color:#cc0000;font-size:13px;min-height:18px"></p><button onclick="edubfSaveSecret()" style="width:100%;background:#0f3d22;color:#fff;border:none;padding:14px;border-radius:10px;font-weight:800;font-size:16px">✅ Enregistrer mon nouveau code</button><p style="font-size:12px;color:#666;margin-top:10px">Apres ca, l\'ancien code ne marchera plus. Seul ton nouveau code ouvrira le Gestionnaire.</p></div>';
+    document.body.appendChild(d);
+  }
+  window.edubfSaveSecret=function(){
+    var a=(document.getElementById('edubf-new-secret').value||'').trim();
+    var b=(document.getElementById('edubf-new-secret2').value||'').trim();
+    var msg=document.getElementById('edubf-setup-msg');
+    if(a.length<8){ msg.textContent='Ton code doit faire au moins 8 caracteres.'; return; }
+    if(a!==b){ msg.textContent='Les deux codes ne sont pas identiques. Retape.'; return; }
+    try{ localStorage.setItem('edubf_manager_secret', a); }catch(e){}
+    var el=document.getElementById('edubf-setup'); if(el) el.remove();
+    alert('✅ Ton nouveau code est enregistré. Retiens-le bien.');
+    location.reload();
+  };
+  // Bouton pour changer le code plus tard, depuis le Gestionnaire uniquement
+  window.edubfChangerCode=function(){
+    var n=prompt('Nouveau code gestionnaire (8 caracteres minimum) :');
+    if(!n || n.trim().length<8){ alert('Code trop court.'); return; }
+    try{ localStorage.setItem('edubf_manager_secret', n.trim()); }catch(e){}
+    alert('✅ Code changé. Retiens ton nouveau code.');
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ if(needSetup()) showSetup(); });
+  else if(needSetup()) showSetup();
 })();
 </script>
 </body>
