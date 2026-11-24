@@ -4572,7 +4572,7 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
 <div id="edubf-update-banner">⭐ Nouvelle version EduBF disponible <button id="edubf-update-btn">Mettre à jour maintenant</button></div>
 <div id="edubf-update-modal"><div id="edubf-update-card">
 <div style="font-size:42px">⭐</div>
-<h2 style="margin:8px 0;color:#157a3a">Mise à jour EduBF v38</h2>
+<h2 style="margin:8px 0;color:#157a3a">Mise à jour EduBF v39</h2>
 <p style="font-size:14px;color:#444">Nouveautés reçues automatiquement :</p>
 <p style="text-align:left;font-size:14px;line-height:1.7">
 ✅ Émargement des enseignants en bas des documents<br>
@@ -4588,7 +4588,7 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
 </div></div>
 <script> // V38 - Mise à jour auto + Cache mot de passe
 (function(){
-  var VERSION_ACTUELLE = 38;
+  var VERSION_ACTUELLE = 39;
   var VERSION_KEY = 'edubf_version';
   // 1) Cacher automatiquement tout texte qui afficherait le mot de passe gestionnaire
   function cacherMotDePasse(){
@@ -4630,7 +4630,7 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
       if('caches' in window){ caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }); }
       if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); }); }
     }catch(e){}
-    var url = location.href.split('?')[0] + '?v=38&maj=' + Date.now();
+    var url = location.href.split('?')[0] + '?v=39&maj=' + Date.now();
     location.href = url;
   }
   document.addEventListener('DOMContentLoaded', function(){ cacherMotDePasse(); setTimeout(verifierMiseAJour, 800); setTimeout(cacherMotDePasse, 2000); });
@@ -4643,6 +4643,214 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
   var btn=document.getElementById('edubf-update-btn'); if(btn) btn.onclick=function(){ document.getElementById('edubf-update-modal').style.display='block'; };
   var conf=document.getElementById('edubf-update-confirm'); if(conf) conf.onclick=appliquerMiseAJour;
   var later=document.getElementById('edubf-update-later'); if(later) later.onclick=function(){ document.getElementById('edubf-update-modal').style.display='none'; document.getElementById('edubf-update-banner').style.display='none'; };
+})();
+</script>
+
+<style id="edubf-v39-style">
+#edubf-registre-panel{ display:none; position:fixed; inset:0; z-index:9999999; background:#f2f7f3; overflow:auto; padding:12px; }
+#edubf-registre-card{ background:#fff; border-radius:16px; max-width:980px; margin:10px auto; padding:16px; }
+#edubf-registre-card h2{ margin:0 0 4px; color:#157a3a; }
+#edubf-registre-card input, #edubf-registre-card select{ padding:9px; border-radius:8px; border:1px solid #ccc; }
+#edubf-registre-card button{ padding:10px 14px; border-radius:10px; border:none; font-weight:700; cursor:pointer; }
+#edubf-registre-grid{ overflow:auto; max-height:420px; border:1px solid #ddd; border-radius:10px; margin-top:10px; }
+#edubf-registre-grid table{ border-collapse:collapse; width:100%; font-size:12px; min-width:720px; }
+#edubf-registre-grid th, #edubf-registre-grid td{ border:1px solid #ddd; padding:5px; text-align:center; }
+#edubf-registre-grid th{ background:#1a9a4a; color:#fff; position:sticky; top:0; }
+#edubf-registre-grid td.nom{ text-align:left; font-weight:700; white-space:nowrap; }
+#edubf-registre-grid input[type=checkbox]{ width:18px; height:18px; accent-color:#cc0000; }
+#edubf-registre-result{ margin-top:14px; }
+#edubf-registre-result table{ width:100%; border-collapse:collapse; font-size:13px; }
+#edubf-registre-result th, #edubf-registre-result td{ border:1px solid #999; padding:8px; text-align:center; }
+#edubf-registre-result th{ background:#e8f8ee; }
+#edubf-registre-result td.lib{ text-align:left; font-weight:700; }
+@media print{ body *{ visibility:hidden; } #edubf-registre-print, #edubf-registre-print *{ visibility:visible; } #edubf-registre-print{ position:absolute; left:0; top:0; width:100%; padding:12px; } }
+#edubf-registre-print{ display:none; }
+@media print{ #edubf-registre-print{ display:block !important; } }
+</style>
+<div id="edubf-registre-panel"><div id="edubf-registre-card">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>📒 Arrêt de Registre</h2><button id="edubf-reg-close" style="background:#eee">✕ Fermer</button></div>
+<p style="font-size:13px;color:#555;margin:4px 0">Registre d'Appel - Lundi, Mardi, Jeudi, Vendredi : Matin + Soir. Mercredi : Matin seulement. Coche = Absent. Case vide = Présent.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<label>Mois : <input type="month" id="edubf-reg-mois"></label>
+<label>Classe : <input type="text" id="edubf-reg-classe" placeholder="Ex : CE2 A" style="width:130px"></label>
+<label>Enseignant : <input type="text" id="edubf-reg-ens" placeholder="Nom enseignant" style="width:150px"></label>
+<button id="edubf-reg-charger" style="background:#1a9a4a;color:#fff">Afficher le mois</button>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<input type="text" id="edubf-reg-nom-eleve" placeholder="Nom de l'élève" style="flex:1;min-width:160px">
+<select id="edubf-reg-sexe"><option value="G">Garçon</option><option value="F">Fille</option></select>
+<button id="edubf-reg-ajout-eleve" style="background:#ffcc00">+ Ajouter élève</button>
+<button id="edubf-reg-importer" style="background:#e8f8ee;color:#157a3a;border:1px solid #1a9a4a">↩ Prendre la liste des élèves de l'app</button>
+</div>
+<div id="edubf-registre-grid"></div>
+<div id="edubf-registre-result"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<button id="edubf-reg-sauver" style="background:#1a9a4a;color:#fff;flex:1">💾 Enregistrer</button>
+<button id="edubf-reg-imprimer" style="background:#0f3d22;color:#fff;flex:1">🖨️ Imprimer Arrêt du Registre</button>
+</div>
+<p style="font-size:12px;color:#888;text-align:center">Les calculs se font tout seuls. Plus de 3 absences = 4 demi-journées et plus.</p>
+</div></div>
+<div id="edubf-registre-print"></div>
+<script> // V39 - Arrêt de Registre
+(function(){
+  var KEY='edubf_registre_appel_v39';
+  function lireTout(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+  function sauverTout(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+  function moisActuel(){ var n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); }
+  function joursOuvrables(moisStr){
+    var parts=moisStr.split('-'); var y=parseInt(parts[0],10), m=parseInt(parts[1],10)-1;
+    var jours=[]; var d=new Date(y,m,1);
+    while(d.getMonth()===m){
+      var dow=d.getDay(); // 0 Dim, 1 Lun, 2 Mar, 3 Mer, 4 Jeu, 5 Ven
+      if(dow>=1 && dow<=5){
+        var label=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'][dow]+' '+d.getDate();
+        var key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        jours.push({key:key, label:label, dow:dow, isMer:(dow===3)});
+      }
+      d.setDate(d.getDate()+1);
+    }
+    return jours;
+  }
+  function getMoisData(){
+    var mois=document.getElementById('edubf-reg-mois').value || moisActuel();
+    var tout=lireTout(); if(!tout[mois]) tout[mois]={eleves:[], abs:{}, classe:'', ens:''};
+    return {mois:mois, tout:tout, data:tout[mois]};
+  }
+  function rendre(){
+    var ctx=getMoisData(); var mois=ctx.mois, data=ctx.data, jours=joursOuvrables(mois);
+    document.getElementById('edubf-reg-classe').value=data.classe||'';
+    document.getElementById('edubf-reg-ens').value=data.ens||'';
+    var html='<table><tr><th style="min-width:150px">Élève</th><th>Sexe</th>';
+    jours.forEach(function(j){ html+='<th colspan="'+(j.isMer?1:2)+'">'+j.label+'</th>'; });
+    html+='<th>Total<br>Abs.</th><th></th></tr>';
+    html+='<tr><td></td><td></td>';
+    jours.forEach(function(j){ html+='<td style="font-size:10px">M</td>'; if(!j.isMer) html+='<td style="font-size:10px">S</td>'; });
+    html+='<td></td><td></td></tr>';
+    if(data.eleves.length===0) html+='<tr><td colspan="5" style="padding:14px;color:#888">Aucun élève. Ajoute les élèves ou clique sur "Prendre la liste des élèves de l\'app".</td></tr>';
+    data.eleves.forEach(function(ev, idx){
+      var total=0; var abs=data.abs[String(idx)]||{};
+      html+='<tr><td class="nom">'+(idx+1)+'. '+(ev.nom||'')+'</td><td>'+(ev.sexe||'')+'</td>';
+      jours.forEach(function(j){
+        var a=abs[j.key]||{};
+        var cm = a.matin ? 'checked' : '';
+        var cs = a.soir ? 'checked' : '';
+        if(cm) total++; if(cs) total++;
+        html+='<td><input type="checkbox" data-idx="'+idx+'" data-jour="'+j.key+'" data-moment="matin" '+cm+'></td>';
+        if(!j.isMer) html+='<td><input type="checkbox" data-idx="'+idx+'" data-jour="'+j.key+'" data-moment="soir" '+cs+'></td>';
+      });
+      html+='<td><b>'+total+'</b></td><td><button data-suppr="'+idx+'" style="background:#fff;border:1px solid #cc0000;color:#cc0000;padding:4px 8px">✕</button></td></tr>';
+    });
+    html+='</table>';
+    document.getElementById('edubf-registre-grid').innerHTML=html;
+    // Events checkboxes
+    document.querySelectorAll('#edubf-registre-grid input[type=checkbox]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var ctx2=getMoisData(); var d2=ctx2.data; var idx=cb.getAttribute('data-idx'); var jour=cb.getAttribute('data-jour'); var mom=cb.getAttribute('data-moment');
+        if(!d2.abs[String(idx)]) d2.abs[String(idx)]={};
+        if(!d2.abs[String(idx)][jour]) d2.abs[String(idx)][jour]={};
+        d2.abs[String(idx)][jour][mom]=cb.checked;
+        ctx2.tout[ctx2.mois]=d2; sauverTout(ctx2.tout); rendre();
+      });
+    });
+    document.querySelectorAll('[data-suppr]').forEach(function(b){
+      b.onclick=function(){ var ctx2=getMoisData(); var d2=ctx2.data; var ix=parseInt(b.getAttribute('data-suppr'),10); d2.eleves.splice(ix,1); var newAbs={}; Object.keys(d2.abs).forEach(function(k){ var nk=parseInt(k,10); if(nk<ix) newAbs[k]=d2.abs[k]; else if(nk>ix) newAbs[String(nk-1)]=d2.abs[k]; }); d2.abs=newAbs; ctx2.tout[ctx2.mois]=d2; sauverTout(ctx2.tout); rendre(); };
+    });
+    calculer();
+  }
+  function calculer(){
+    var ctx=getMoisData(); var data=ctx.data, mois=ctx.mois, jours=joursOuvrables(mois);
+    var nbDemi=0; jours.forEach(function(j){ nbDemi+= j.isMer?1:2; });
+    var eleves=data.eleves||[];
+    var nbG=eleves.filter(function(e){return e.sexe==='G';}).length;
+    var nbF=eleves.filter(function(e){return e.sexe==='F';}).length;
+    var nbT=eleves.length;
+    function absEleve(idx){ var tot=0; var abs=data.abs[String(idx)]||{}; Object.keys(abs).forEach(function(k){ var a=abs[k]; if(a.matin) tot++; if(a.soir) tot++; }); return tot; }
+    var absG=0, absF=0, plus3=0; var listePlus3=[];
+    eleves.forEach(function(ev, idx){ var a=absEleve(idx); if(ev.sexe==='G') absG+=a; else absF+=a; if(a>=4){ plus3++; listePlus3.push((ev.nom||'')+' ('+a+' abs.)'); } });
+    var absT=absG+absF;
+    var possG=nbG*nbDemi, possF=nbF*nbDemi, possT=nbT*nbDemi;
+    var effG=possG-absG, effF=possF-absF, effT=possT-absT;
+    function taux(num, den){ if(!den) return '0 %'; return (num/den*100).toFixed(1).replace('.',',')+' %'; }
+    var html='<h3 style="color:#157a3a">📊 Arrêt du Registre - '+mois+' - '+(data.classe||'')+'</h3>'
+      +'<table><tr><th></th><th>Garçon</th><th>Fille</th><th>Total</th></tr>'
+      +'<tr><td class="lib">Nombre d\'élèves</td><td>'+nbG+'</td><td>'+nbF+'</td><td><b>'+nbT+'</b></td></tr>'
+      +'<tr><td class="lib">Nombre de demi-journées</td><td colspan="3"><b>'+nbDemi+'</b></td></tr>'
+      +'<tr><td class="lib">Nombre de présences possibles</td><td>'+possG+'</td><td>'+possF+'</td><td><b>'+possT+'</b></td></tr>'
+      +'<tr><td class="lib">Nombre d\'absences du mois</td><td>'+absG+'</td><td>'+absF+'</td><td><b>'+absT+'</b></td></tr>'
+      +'<tr><td class="lib">Nombre de présences effectives</td><td>'+effG+'</td><td>'+effF+'</td><td><b>'+effT+'</b></td></tr>'
+      +'<tr><td class="lib">Taux d\'absence du mois</td><td>'+taux(absG,possG)+'</td><td>'+taux(absF,possF)+'</td><td><b>'+taux(absT,possT)+'</b></td></tr>'
+      +'<tr><td class="lib">Taux de présence du mois</td><td>'+taux(effG,possG)+'</td><td>'+taux(effF,possF)+'</td><td><b>'+taux(effT,possT)+'</b></td></tr></table>'
+      +'<h3 style="color:#157a3a;margin-top:16px">📋 Tableau Récapitulatif</h3>'
+      +'<table><tr><th></th><th>Garçon</th><th>Fille</th><th>Total</th></tr>'
+      +'<tr><td class="lib">Nombre d\'élèves</td><td>'+nbG+'</td><td>'+nbF+'</td><td><b>'+nbT+'</b></td></tr>'
+      +'<tr><td class="lib">Présences possibles</td><td>'+possG+'</td><td>'+possF+'</td><td><b>'+possT+'</b></td></tr>'
+      +'<tr><td class="lib">Absences du mois</td><td>'+absG+'</td><td>'+absF+'</td><td><b>'+absT+'</b></td></tr>'
+      +'<tr><td class="lib">Présences effectives</td><td>'+effG+'</td><td>'+effF+'</td><td><b>'+effT+'</b></td></tr>'
+      +'<tr><td class="lib">Taux d\'absence</td><td>'+taux(absG,possG)+'</td><td>'+taux(absF,possF)+'</td><td><b>'+taux(absT,possT)+'</b></td></tr>'
+      +'<tr><td class="lib">Taux de présence</td><td>'+taux(effG,possG)+'</td><td>'+taux(effF,possF)+'</td><td><b>'+taux(effT,possT)+'</b></td></tr>'
+      +'<tr><td class="lib">Nombre d\'élèves ayant plus de 3 absences</td><td colspan="3"><b>'+plus3+'</b>'+(listePlus3.length?'<br><span style="font-size:12px;color:#333">'+listePlus3.join(' ; ')+'</span>':'')+'</td></tr></table>'
+      +'<div style="display:flex;gap:10px;margin-top:14px"><div style="flex:1;border:1px solid #777;border-radius:8px;padding:10px;text-align:center"><b>Enseignant</b><br>'+(data.ens||'Nom : ................')+'<br><br>Signature - Date</div><div style="flex:1;border:1px solid #777;border-radius:8px;padding:10px;text-align:center"><b>Directeur</b><br>Nom : ................<br><br>Signature - Date</div></div>'
+      +'<div style="display:flex;gap:10px;margin-top:10px"><div style="flex:1;border:1px solid #777;border-radius:8px;padding:10px;text-align:center"><b>Visa du Directeur</b><br><br>Signature - Date</div><div style="flex:1;border:1px solid #777;border-radius:8px;padding:10px;text-align:center"><b>Visa du CCEB</b><br><br>Signature - Date</div></div>';
+    document.getElementById('edubf-registre-result').innerHTML=html;
+    return {nbG:nbG,nbF:nbF,nbT:nbT,nbDemi:nbDemi,possG:possG,possF:possF,possT:possT,absG:absG,absF:absF,absT:absT,effG:effG,effF:effF,effT:effT,plus3:plus3,listePlus3:listePlus3};
+  }
+  function ouvrir(){
+    if(!document.getElementById('edubf-reg-mois').value) document.getElementById('edubf-reg-mois').value=moisActuel();
+    document.getElementById('edubf-registre-panel').style.display='block';
+    rendre();
+  }
+  function ajouterBouton(){
+    if(document.getElementById('edubf-reg-open')) return;
+    var cible=document.getElementById('edubf-sig-open');
+    if(cible && cible.parentNode){
+      var b=document.createElement('button'); b.id='edubf-reg-open'; b.textContent='📒 Arrêt de Registre';
+      b.style.cssText='padding:10px 14px;border-radius:999px;border:1px solid #1a9a4a;background:#1a9a4a;color:#fff;font-weight:700;margin:6px;cursor:pointer';
+      b.onclick=ouvrir;
+      cible.parentNode.insertBefore(b, cible.nextSibling);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', ajouterBouton);
+  setTimeout(ajouterBouton, 2000); setTimeout(ajouterBouton, 4000);
+  document.getElementById('edubf-reg-close').onclick=function(){ document.getElementById('edubf-registre-panel').style.display='none'; };
+  document.getElementById('edubf-reg-charger').onclick=function(){ rendre(); };
+  document.getElementById('edubf-reg-mois').addEventListener('change', rendre);
+  document.getElementById('edubf-reg-classe').addEventListener('input', function(){ var ctx=getMoisData(); ctx.data.classe=this.value; ctx.tout[ctx.mois]=ctx.data; sauverTout(ctx.tout); });
+  document.getElementById('edubf-reg-ens').addEventListener('input', function(){ var ctx=getMoisData(); ctx.data.ens=this.value; ctx.tout[ctx.mois]=ctx.data; sauverTout(ctx.tout); });
+  document.getElementById('edubf-reg-ajout-eleve').onclick=function(){
+    var nom=document.getElementById('edubf-reg-nom-eleve').value.trim(); if(!nom){ alert('Mets le nom de l\'élève.'); return; }
+    var sexe=document.getElementById('edubf-reg-sexe').value;
+    var ctx=getMoisData(); ctx.data.eleves.push({nom:nom, sexe:sexe}); ctx.tout[ctx.mois]=ctx.data; sauverTout(ctx.tout);
+    document.getElementById('edubf-reg-nom-eleve').value=''; rendre();
+  };
+  document.getElementById('edubf-reg-importer').onclick=function(){
+    // Essayer de récupérer les élèves déjà dans l'app (plusieurs clés possibles)
+    var trouves=[];
+    try{
+      var cles=['edubf_eleves','eleves','edubf_eleves_v2','edubf_students'];
+      cles.forEach(function(k){ try{ var v=JSON.parse(localStorage.getItem(k)||'[]'); if(Array.isArray(v)) v.forEach(function(e){ var nom=e.nom||e.name||e.nom_complet||''; var sexe=e.sexe||e.genre||e.sex||''; if(nom){ var s='G'; if(/fille|femme|^F$/i.test(String(sexe))) s='F'; else if(/garcon|garçon|^G$/i.test(String(sexe))) s='G'; else if(e.sexe==='F') s='F'; trouves.push({nom:nom, sexe:s}); } }); }catch(e){} });
+      // Aussi chercher dans toutes les clés qui contiennent "eleve"
+      if(trouves.length===0){ for(var i=0;i<localStorage.length;i++){ var kk=localStorage.key(i); if(kk && kk.toLowerCase().indexOf('eleve')>=0){ try{ var vv=JSON.parse(localStorage.getItem(kk)||'[]'); if(Array.isArray(vv)) vv.forEach(function(e){ var n2=e.nom||e.name||''; if(n2) trouves.push({nom:n2, sexe:(e.sexe==='F'?'F':'G')}); }); }catch(e){} } } }
+    }catch(e){}
+    if(trouves.length===0){ alert('Je n\'ai pas trouvé la liste des élèves dans l\'app. Ajoute-les à la main, une fois, ils resteront enregistrés.'); return; }
+    var ctx=getMoisData(); var exist=new Set(ctx.data.eleves.map(function(e){return e.nom;})); var ajout=0;
+    trouves.forEach(function(e){ if(!exist.has(e.nom)){ ctx.data.eleves.push(e); ajout++; } });
+    ctx.tout[ctx.mois]=ctx.data; sauverTout(ctx.tout); rendre(); alert(ajout+' élèves ajoutés ✅');
+  };
+  document.getElementById('edubf-reg-sauver').onclick=function(){
+    var ctx=getMoisData(); ctx.data.classe=document.getElementById('edubf-reg-classe').value; ctx.data.ens=document.getElementById('edubf-reg-ens').value; ctx.tout[ctx.mois]=ctx.data; sauverTout(ctx.tout); alert('Arrêt de Registre enregistré ✅');
+  };
+  document.getElementById('edubf-reg-imprimer').onclick=function(){
+    var ctx=getMoisData(); ctx.data.classe=document.getElementById('edubf-reg-classe').value; ctx.data.ens=document.getElementById('edubf-reg-ens').value; ctx.tout[ctx.mois]=ctx.data; sauverTout(ctx.tout);
+    var res=calculer();
+    var printDiv=document.getElementById('edubf-registre-print');
+    var jours=joursOuvrables(ctx.mois);
+    var html='<h2 style="text-align:center">📒 Arrêt de Registre - '+ctx.mois+' - '+(ctx.data.classe||'')+'</h2><p style="text-align:center">Enseignant : '+(ctx.data.ens||'')+'</p>';
+    html+='<p><b>Nombre de demi-journées :</b> '+res.nbDemi+'</p>';
+    html+=document.getElementById('edubf-registre-result').innerHTML;
+    printDiv.innerHTML=html;
+    document.title='Arret de Registre - '+ctx.mois+' - EduBF';
+    setTimeout(function(){ window.print(); }, 100);
+  };
 })();
 </script>
 </body>
