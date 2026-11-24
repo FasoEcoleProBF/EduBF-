@@ -4636,7 +4636,7 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
       if('caches' in window){ caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }); }
       if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); }); }
     }catch(e){}
-    var url = location.href.split('?')[0] + '?v=42&maj=' + Date.now();
+    var url = location.href.split('?')[0] + '?v=43&maj=' + Date.now();
     location.href = url;
   }
   document.addEventListener('DOMContentLoaded', function(){ cacherMotDePasse(); setTimeout(verifierMiseAJour, 800); setTimeout(cacherMotDePasse, 2000); });
@@ -4906,7 +4906,7 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
 </style>
 <div id="edubf-sport-panel"><div id="edubf-sport-card">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>🏃 Sport CM2 — Barème CEP / 6ème — Session 2025</h2><button id="edubf-sport-close" style="background:#eee;padding:8px 12px;border-radius:8px">✕ Fermer</button></div>
-<p style="font-size:13px;color:#555">Barème officiel : <b>60 m</b>, <b>Saut en hauteur</b>, <b>Saut en longueur</b>. Note de chaque discipline <b>/20</b>. Note définitive <b>/10</b> = moyenne des disciplines ÷ 2. Règle officielle : toute performance intermédiaire est rapportée à la performance inférieure. Exemple officiel : 10,5 s → 10,6 s = Fille 15+ : 8/20, Fille 12-14 : 9/20, Fille -12 ans : 11/20, Garçon 15+ : 6/20, Garçon 12-14 : 8/20, Garçon -12 ans : 10/20.</p>
+<p style="font-size:13px;color:#555">Barème officiel Burkina Faso : <b>60 m</b> et <b>Saut en longueur</b>. Pas de saut en hauteur. Note de chaque discipline <b>/20</b>. Note définitive <b>/10</b> = (Note 60 m + Note Longueur) ÷ 2 ÷ 2. Règle officielle : toute performance intermédiaire est rapportée à la performance inférieure. Exemple officiel : 10,5 s → 10,6 s = Fille 15+ : 8/20, Fille 12-14 : 9/20, Fille -12 ans : 11/20, Garçon 15+ : 6/20, Garçon 12-14 : 8/20, Garçon -12 ans : 10/20.</p>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
 <label>Classe : <select id="edubf-sport-classe" style="min-width:140px"></select></label>
 <label>Destination : <select id="edubf-sport-dest"><option value="trim1">Trimestre 1 — Notes trimestrielles</option><option value="trim2">Trimestre 2 — Notes trimestrielles</option><option value="trim3">Trimestre 3 — Notes trimestrielles</option><option value="cm2_ecole1">Examen blanc — École 1er</option><option value="cm2_ecole2">Examen blanc — École 2ème</option><option value="cm2_ceb1">Examen blanc — CEB 1er</option><option value="cm2_ceb2">Examen blanc — CEB 2ème</option><option value="cm2_prov">Examen blanc — Provincial</option><option value="cm2_reg">Examen blanc — Régional</option></select></label>
@@ -4923,9 +4923,9 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
 <p style="font-size:12px;color:#888;text-align:center">Après « Envoyer », la note Sport apparaît dans : Saisir notes → Bulletins → Feuille de résultats → Tableau synoptique (si le Sport est évalué). Pour l'examen blanc, elle apparaît dans les résultats de l'examen choisi.</p>
 <div id="edubf-sport-result"></div>
 </div></div>
-<script> // V42 - Sport CM2 Bareme CEP 2025
+<script> // V43 - Sport CM2 Bareme CEP 2025
 (function(){
-  var KEY='edubf_sport_cm2_v42';
+  var KEY='edubf_sport_cm2_v43';
   var PERF=[
     {t:8.4,h:1.40,l:4.20},{t:8.6,h:1.37,l:4.10},{t:8.8,h:1.33,l:4.00},{t:8.9,h:1.30,l:3.90},{t:9.1,h:1.26,l:3.80},
     {t:9.2,h:1.23,l:3.70},{t:9.3,h:1.20,l:3.60},{t:9.5,h:1.17,l:3.50},{t:9.6,h:1.13,l:3.40},{t:9.8,h:1.11,l:3.30},
@@ -4978,24 +4978,23 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
     remplirClasses();
     var ctx=getData(); var cid=document.getElementById('edubf-sport-classe').value||'';
     var eleves=elevesClasse(cid);
-    var html='<table><tr><th>N°</th><th style="min-width:170px">Nom &amp; Prénom</th><th>Sexe</th><th>Âge</th><th>Catégorie</th><th>60 m<br><small>(secondes)</small></th><th>Note<br>60 m /20</th><th>Saut hauteur<br><small>(m)</small></th><th>Note<br>Haut. /20</th><th>Saut longueur<br><small>(m)</small></th><th>Note<br>Long. /20</th><th>Note définitive<br>/10</th></tr>';
-    if(!eleves.length) html+='<tr><td colspan="12" style="padding:14px;color:#888">Aucun élève dans cette classe. Ajoute les élèves dans Élèves, avec Nom + Prénom, Sexe et Date de naissance.</td></tr>';
+    var html='<table><tr><th>N°</th><th style="min-width:170px">Nom &amp; Prénom</th><th>Sexe</th><th>Âge</th><th>Catégorie</th><th>60 m<br><small>(secondes)</small></th><th>Note<br>60 m /20</th><th>Saut longueur<br><small>(m)</small></th><th>Note<br>Long. /20</th><th>Note définitive<br>/10</th></tr>';
+    if(!eleves.length) html+='<tr><td colspan="10" style="padding:14px;color:#888">Aucun élève dans cette classe. Ajoute les élèves dans Élèves, avec Nom + Prénom, Sexe et Date de naissance.</td></tr>';
     eleves.forEach(function(e, i){
       var r=(ctx.data.rows[e.id]||{});
       var age=(r.age!==undefined&&r.age!==null&&r.age!=='')?r.age:ageDe(e);
       var cat=catAge(age);
       var catTxt=cat==='u12'?'Moins de 12 ans':(cat==='moy'?'12, 13, 14 ans':'15 ans et +');
       var nT=notePour(e.sexe, age, 't', r.t);
-      var nH=notePour(e.sexe, age, 'h', r.h);
       var nL=notePour(e.sexe, age, 'l', r.l);
-      var notes=[nT,nH,nL].filter(function(x){return x!==null;});
+      var notes=[nT,nL].filter(function(x){return x!==null;});
       var def=notes.length? (notes.reduce(function(a,b){return a+b;},0)/notes.length/2) : null;
       var isF=e.sexe==='F';
       var rowCls=isF?'fille-row':'';
       html+='<tr class="'+rowCls+'"><td>'+(i+1)+'</td><td style="text-align:left;'+(isF?'color:#cc0000;font-weight:800':'')+'">'+nomComplet(e)+'</td><td class="'+(isF?'fille':'')+'">'+(e.sexe==='F'?'Fille':'Garçon')+'</td>'
         +'<td><input type="number" data-sport-age="'+e.id+'" value="'+(age===''?'':age)+'" min="6" max="20" style="width:56px"></td><td style="font-size:11px">'+catTxt+'</td>'
         +'<td><input type="text" inputmode="decimal" data-sport-t="'+e.id+'" value="'+(r.t||'')+'" placeholder="ex 10,6" style="width:70px"></td><td><b>'+(nT===null?'—':nT)+'</b></td>'
-        +'<td><input type="text" inputmode="decimal" data-sport-h="'+e.id+'" value="'+(r.h||'')+'" placeholder="ex 1,08" style="width:70px"></td><td><b>'+(nH===null?'—':nH)+'</b></td>'
+
         +'<td><input type="text" inputmode="decimal" data-sport-l="'+e.id+'" value="'+(r.l||'')+'" placeholder="ex 3,60" style="width:70px"></td><td><b>'+(nL===null?'—':nL)+'</b></td>'
         +'<td style="'+(isF?'color:#cc0000;':'')+'font-weight:800;font-size:14px">'+(def===null?'—':def.toFixed(2))+'</td></tr>';
     });
@@ -5006,7 +5005,7 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
         inp.addEventListener('change', function(){ var ctx2=getData(); var id=inp.getAttribute(attr); if(!ctx2.data.rows[id]) ctx2.data.rows[id]={}; ctx2.data.rows[id][field]=inp.value; ctx2.tout[ctx2.k]=ctx2.data; sauverTout(ctx2.tout); rendre(); });
       });
     }
-    bind('data-sport-age','age'); bind('data-sport-t','t'); bind('data-sport-h','h'); bind('data-sport-l','l');
+    bind('data-sport-age','age'); bind('data-sport-t','t'); bind('data-sport-l','l');
     // Résumé
     var nb=eleves.length, nbF=eleves.filter(function(x){return x.sexe==='F';}).length;
     document.getElementById('edubf-sport-result').innerHTML='<p style="font-size:13px;color:#555">Classe : <b>'+nb+'</b> élèves dont <b style="color:#cc0000">'+nbF+' filles</b>. Les notes se calculent toutes seules avec le barème CEP 2025.</p>';
@@ -5056,7 +5055,7 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
       var data={}; try{ data=S.get('n_'+key,{}); }catch(e){}
       eleves.forEach(function(e){
         var r=ctx.data.rows[e.id]||{}; var age=(r.age!==undefined&&r.age!==''&&r.age!==null)?r.age:ageDe(e);
-        var notes=[notePour(e.sexe,age,'t',r.t),notePour(e.sexe,age,'h',r.h),notePour(e.sexe,age,'l',r.l)].filter(function(x){return x!==null;});
+        var notes=[notePour(e.sexe,age,'t',r.t),notePour(e.sexe,age,'l',r.l)].filter(function(x){return x!==null;});
         if(notes.length){ var def=(notes.reduce(function(a,b){return a+b;},0)/notes.length/2); data[e.id]=Math.round(def*2*100)/100; count++; }
       });
       try{
@@ -5077,7 +5076,7 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
       var data2={}; try{ data2=S.get('exnote_'+ep.id,{}); }catch(e){}
       eleves.forEach(function(e){
         var r=ctx.data.rows[e.id]||{}; var age=(r.age!==undefined&&r.age!==''&&r.age!==null)?r.age:ageDe(e);
-        var notes=[notePour(e.sexe,age,'t',r.t),notePour(e.sexe,age,'h',r.h),notePour(e.sexe,age,'l',r.l)].filter(function(x){return x!==null;});
+        var notes=[notePour(e.sexe,age,'t',r.t),notePour(e.sexe,age,'l',r.l)].filter(function(x){return x!==null;});
         if(notes.length){ var def=(notes.reduce(function(a,b){return a+b;},0)/notes.length/2); data2[e.id]=Math.round(def*100)/100; count++; }
       });
       try{ S.set('exnote_'+ep.id, data2); }catch(e){}
@@ -5089,13 +5088,13 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
     var cid=document.getElementById('edubf-sport-classe').value; var dest=document.getElementById('edubf-sport-dest').value;
     var ctx=getData(); var eleves=elevesClasse(cid);
     var clNom=''; try{ var cl=CL.find(function(c){return c.id===cid;}); if(cl) clNom=cl.nom; }catch(e){}
-    var html='<h2 style="text-align:center">🏃 Sport CM2 — Barème CEP 2025 — '+clNom+'</h2><p style="text-align:center">Destination : '+dest+'</p><table border="1" cellpadding="6" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:12px"><tr><th>N°</th><th>Nom &amp; Prénom</th><th>Sexe</th><th>Âge</th><th>60 m</th><th>Note /20</th><th>Hauteur</th><th>Note /20</th><th>Longueur</th><th>Note /20</th><th>Définitive /10</th></tr>';
+    var html='<h2 style="text-align:center">🏃 Sport CM2 — Barème CEP 2025 — '+clNom+'</h2><p style="text-align:center">Destination : '+dest+'</p><table border="1" cellpadding="6" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:12px"><tr><th>N°</th><th>Nom &amp; Prénom</th><th>Sexe</th><th>Âge</th><th>60 m</th><th>Note /20</th><th>Longueur</th><th>Note /20</th><th>Définitive /10</th></tr>';
     eleves.forEach(function(e,i){
       var r=ctx.data.rows[e.id]||{}; var age=(r.age!==undefined&&r.age!==''&&r.age!==null)?r.age:ageDe(e);
-      var nT=notePour(e.sexe,age,'t',r.t), nH=notePour(e.sexe,age,'h',r.h), nL=notePour(e.sexe,age,'l',r.l);
-      var notes=[nT,nH,nL].filter(function(x){return x!==null;}); var def=notes.length?(notes.reduce(function(a,b){return a+b;},0)/notes.length/2):null;
+      var nT=notePour(e.sexe,age,'t',r.t), nL=notePour(e.sexe,age,'l',r.l);
+      var notes=[nT,nL].filter(function(x){return x!==null;}); var def=notes.length?(notes.reduce(function(a,b){return a+b;},0)/notes.length/2):null;
       var st=e.sexe==='F'?' style="color:#cc0000;font-weight:800"':'';
-      html+='<tr'+st+'><td>'+(i+1)+'</td><td style="text-align:left">'+nomComplet(e)+'</td><td>'+(e.sexe==='F'?'Fille':'Garçon')+'</td><td>'+(age===''?'':age)+'</td><td>'+(r.t||'')+'</td><td>'+(nT===null?'—':nT)+'</td><td>'+(r.h||'')+'</td><td>'+(nH===null?'—':nH)+'</td><td>'+(r.l||'')+'</td><td>'+(nL===null?'—':nL)+'</td><td><b>'+(def===null?'—':def.toFixed(2))+'</b></td></tr>';
+      html+='<tr'+st+'><td>'+(i+1)+'</td><td style="text-align:left">'+nomComplet(e)+'</td><td>'+(e.sexe==='F'?'Fille':'Garçon')+'</td><td>'+(age===''?'':age)+'</td><td>'+(r.t||'')+'</td><td>'+(nT===null?'—':nT)+'</td><td>'+(r.l||'')+'</td><td>'+(nL===null?'—':nL)+'</td><td><b>'+(def===null?'—':def.toFixed(2))+'</b></td></tr>';
     });
     html+='</table><p style="font-size:11px">Barème CEP / 6ème — Session 2025. Règle : performance intermédiaire rapportée à la performance inférieure.</p>';
     var w=window.open('','_blank'); if(!w){ alert('Autorise les fenêtres pop-up pour imprimer.'); return; }
