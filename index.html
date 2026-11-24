@@ -184,8 +184,6 @@ hr{border:none;border-top:1px solid var(--bd);margin:10px 0}
     document.getElementById('licence-ecran').style.display='none';
   };
   function demarrer(){
-    // V46 : l'ANCIEN ecran licence est SUPPRIME. Seul le verrou Gmail + code 6 chiffres compte.
-    // Les collegues qui ont ouvert hier avec Gmail + mot de passe + code sont DEJA valides : on migre leur licence.
     try{
       var oldLic=null; try{ oldLic=JSON.parse(localStorage.getItem('edubf_licence')||'null'); }catch(e){}
       if(oldLic && oldLic.gmail){
@@ -194,8 +192,6 @@ hr{border:none;border-top:1px solid var(--bd);margin:10px 0}
         var devM=localStorage.getItem('edubf_device')||'';
         localStorage.setItem('edubf_licence_12mois', JSON.stringify({gmail:oldLic.gmail, fin:finStr, debut:new Date().toISOString().slice(0,10), device:devM, migre_de_ancien_ecran:true}));
         localStorage.setItem('edubf_gmail', oldLic.gmail);
-        var regM=[]; try{ regM=JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]'); }catch(e){}
-        if(!regM.some(function(r){return r && r.gmail===oldLic.gmail;})){ regM.push({gmail:oldLic.gmail, code:'', debut:new Date().toISOString().slice(0,10), fin:finStr, statut:'Actif', device:devM}); localStorage.setItem('edubf_registre_12mois', JSON.stringify(regM)); }
       }
     }catch(e){}
     var ecran0=document.getElementById('licence-ecran'); if(ecran0){ ecran0.style.display='none'; ecran0.remove(); }
@@ -395,52 +391,7 @@ function FP2_imprimer(){
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
   var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
-  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+copie.innerHTML+'
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'</body><'+'/html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
@@ -1683,7 +1634,7 @@ function printFeuilleComposition(cid, titre, matieresList){
     'tr:nth-child(even){background:#f7f7f7}'+
     '.sig{margin-top:12mm;display:flex;justify-content:space-between}'+
     '.sb{text-align:center;width:45%;border-top:1px solid #333;padding-top:5px;font-weight:700}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -1691,52 +1642,7 @@ function printFeuilleComposition(cid, titre, matieresList){
     '<h1>'+titre+'</h1>'+
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th>'+colHeaders+'</tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html, titre);
 }
 // ===== CALCULS =====
@@ -1898,52 +1804,7 @@ function printBulletinAnnuelIndividuel(eid,cid){
   if(!e){toast('⚠️ Élève introuvable','#cc0000');return}
   var html=bulletinAnnuelHTML(eid,cid);
   var titre='Bulletin_Annuel_'+e.nom.replace(/[^a-z0-9]/gi,'_')+'_'+e.pre.replace(/[^a-z0-9]/gi,'_');
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body><div class="bpageAn" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div>
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style></head><body><div class="bpageAn" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div></body></html>',titre);
 }
 function printBulletinAnnuelClasse(cid){
   var cl=CL.find(function(c){return c.id===cid});
@@ -1955,52 +1816,7 @@ function printBulletinAnnuelClasse(cid){
     pages+='<div class="bpageAn">'+htmls[i]+(htmls[i+1]?htmls[i+1]:'<div style="height:128mm"></div>')+'</div>';
   }
   var titre='Bulletins_Annuels_'+(cl?cl.nom.replace(/[^a-z0-9]/gi,'_'):'Classe');
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+pages+'
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style></head><body>'+pages+'</body></html>',titre);
 }
 
 // ===== FEUILLE DE RÉSULTATS (registre de classe pour l'inspection) =====
@@ -2105,7 +1921,7 @@ function printFeuilleResultats(){
     'tr:nth-child(even){background:#f5f5f5}'+
     '.sig{margin-top:14mm;display:flex;justify-content:space-between}'+
     '.sb{text-align:center;width:45%;border-top:1px solid #333;padding-top:5px;font-weight:700}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -2113,52 +1929,7 @@ function printFeuilleResultats(){
     '<h1>FEUILLE DE RÉSULTATS'+(sortMode==='alpha'?' (ordre alphabétique)':' (ordre de mérite)')+'</h1>'+
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th>'+matHeaders+'<th>Total</th><th>Moy/10</th><th>Rang</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(res.cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html,'Feuille_Resultats_'+res.cl.nom.replace(/[^a-z0-9]/gi,'_')+'_'+tnames[tr].replace(/[^a-z0-9]/gi,'_'));
 }
 
@@ -2270,52 +2041,7 @@ function PB(eid,cid,tr){
   var html=bulletinHTML(e,cl,tr,elevs,ranked);
   var tnames={'1':'T1','2':'T2','3':'T3'};
   var titre='Bulletin_'+e.nom+'_'+e.pre+'_'+tnames[tr];
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body><div class="bpage" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div>'+FIT_SCRIPT+'
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style></head><body><div class="bpage" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div>'+FIT_SCRIPT+'</body></html>',titre);
 }
 function PBClasse(cid,tr){
   var cl=CL.find(function(c){return c.id===cid});
@@ -2334,52 +2060,7 @@ function PBClasse(cid,tr){
   }
   var tnames={'1':'T1','2':'T2','3':'T3'};
   var titre='Bulletins_'+(cl?cl.nom.replace(/[^a-z0-9]/gi,'_'):'Classe')+'_'+tnames[tr];
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+pages+FIT_SCRIPT+'
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style></head><body>'+pages+FIT_SCRIPT+'</body></html>',titre);
 }
 // ===== CARTES =====
 function LC(){
@@ -2547,52 +2228,7 @@ function BPC(elevs,cl,an){
   '.csigph{font-size:6pt;color:#aaa;font-style:italic}'+
   '.cdirname{text-align:center;font-size:5.3pt;font-weight:700;color:#1a1a2e;padding:0.3mm 0;flex-shrink:0}'+
   '.cbar{text-align:center;font-size:5.5pt;letter-spacing:1.5px;color:#999;font-family:monospace;flex-shrink:0;padding:0.8mm 0;border-top:1px solid #eee;background:#fafafa}'+
-  '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+cards+'
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>',titreCartes);
+  '</style></head><body>'+cards+'</body></html>',titreCartes);
 }
 // ===== CERTIFICATS =====
 function LCE(){
@@ -2626,52 +2262,7 @@ function PCE(eid){
     + '<p class="bt">Certifie que '+civil+' <b>'+e.nom+' '+e.pre+'</b>, '+neTxt+' le <b>'+fd(e.ddn)+'</b> à <b>'+(e.lieu||pointCourt)+'</b>, de <b>'+nomPere+'</b> et de <b>'+nomMere+'</b>,</p>'
     + '<p class="bt">est '+inscritTxt+' dans mon établissement depuis le <b>'+dateEntree+'</b>, où il est '+eleveTxt+' dans la classe de <b>'+(cl?cl.nom:'................................................')+'</b>, au titre de l\'année scolaire <b>'+(PA.annee||'................................................')+'</b>.</p>'
     + '<p class="bt">En foi de quoi, le présent certificat est établi <b>pour servir et valoir ce que de droit</b>.</p>';
-  OP('<html><head><title>'+titreCert+'</title><style>body{font-family:Georgia,serif;padding:10mm;color:#111;font-size:12px}@page{size:A4 portrait;margin:10mm}.brd{border:3px double #0a5c2e;padding:22px 26px;position:relative}.hdr{text-align:center;border-bottom:2px solid #0a5c2e;padding-bottom:12px;margin-bottom:15px}h1{color:#0a5c2e;font-size:1.1em;letter-spacing:2px;text-transform:uppercase;margin:6px 0}h2{color:#0a5c2e;font-size:1.3em;text-transform:uppercase;letter-spacing:3px;margin:12px 0 6px;text-align:center}.bt{font-size:1.05em;line-height:1.9;text-align:justify;margin:10px 0}.ft{margin-top:12mm;display:flex;justify-content:flex-end}.ft-in{text-align:center;width:55%}.ft-in .lieu{font-weight:700}.ft-in .dir{margin-top:8px;font-weight:800;text-decoration:underline}.ft-in .gap{height:18mm}.ft-in .sig{border-top:1.5px solid #0a5c2e;padding-top:6px;font-weight:800}.ft-in .nom{margin-top:6px;font-weight:800}</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body><div class="brd"><div class="hdr"><p style="color:#666;font-style:italic">La Patrie ou la Mort, nous Vaincrons !</p><p style="font-size:.85em;color:#666">BURKINA FASO</p><h1>'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</h1><p style="font-size:.85em">'+(PA.type||'')+'</p><p style="font-size:.8em;color:#666">'+(PA.region||'')+' '+(PA.province?'– '+PA.province:'')+' '+(PA.ville?'– '+PA.ville:'')+' | Tél : '+(PA.tel||'—')+'</p></div><h2>Certificat de Scolarité</h2>'+corps+'<div class="ft"><div class="ft-in"><p class="lieu">Fait à '+(PA.ville||'........................')+', le '+dt+'</p><p class="dir">Le Directeur</p><div class="gap"></div><p class="sig">Signature et Cachet</p><p class="nom">'+(PA.dir||'')+'</p></div></div></div>
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>',titreCert);
+  OP('<html><head><title>'+titreCert+'</title><style>body{font-family:Georgia,serif;padding:10mm;color:#111;font-size:12px}@page{size:A4 portrait;margin:10mm}.brd{border:3px double #0a5c2e;padding:22px 26px;position:relative}.hdr{text-align:center;border-bottom:2px solid #0a5c2e;padding-bottom:12px;margin-bottom:15px}h1{color:#0a5c2e;font-size:1.1em;letter-spacing:2px;text-transform:uppercase;margin:6px 0}h2{color:#0a5c2e;font-size:1.3em;text-transform:uppercase;letter-spacing:3px;margin:12px 0 6px;text-align:center}.bt{font-size:1.05em;line-height:1.9;text-align:justify;margin:10px 0}.ft{margin-top:12mm;display:flex;justify-content:flex-end}.ft-in{text-align:center;width:55%}.ft-in .lieu{font-weight:700}.ft-in .dir{margin-top:8px;font-weight:800;text-decoration:underline}.ft-in .gap{height:18mm}.ft-in .sig{border-top:1.5px solid #0a5c2e;padding-top:6px;font-weight:800}.ft-in .nom{margin-top:6px;font-weight:800}</style></head><body><div class="brd"><div class="hdr"><p style="color:#666;font-style:italic">La Patrie ou la Mort, nous Vaincrons !</p><p style="font-size:.85em;color:#666">BURKINA FASO</p><h1>'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</h1><p style="font-size:.85em">'+(PA.type||'')+'</p><p style="font-size:.8em;color:#666">'+(PA.region||'')+' '+(PA.province?'– '+PA.province:'')+' '+(PA.ville?'– '+PA.ville:'')+' | Tél : '+(PA.tel||'—')+'</p></div><h2>Certificat de Scolarité</h2>'+corps+'<div class="ft"><div class="ft-in"><p class="lieu">Fait à '+(PA.ville||'........................')+', le '+dt+'</p><p class="dir">Le Directeur</p><div class="gap"></div><p class="sig">Signature et Cachet</p><p class="nom">'+(PA.dir||'')+'</p></div></div></div></body></html>',titreCert);
 }
 
 // ===== FICHES =====
@@ -2989,7 +2580,7 @@ function printSynoptique(cid,tr){
     'tr:nth-child(even){background:#f5f5f5}'+
     '.sig{margin-top:14mm;display:flex;justify-content:space-between}'+
     '.sb{text-align:center;width:30%;border-top:1px solid #333;padding-top:5px;font-weight:700}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -3011,52 +2602,7 @@ function printSynoptique(cid,tr){
     matRows+
     '</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div><div class="sb">Cachet de l\'école</div></div>'+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html,titreSynop);
 }
 
@@ -3202,7 +2748,7 @@ function printListeAlpha(){
     '.recapGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}'+
     '.sig{margin-top:16mm;display:flex;justify-content:space-between}'+
     '.sb{text-align:center;width:40%;border-top:1px solid #333;padding-top:6px;font-weight:700}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -3217,52 +2763,7 @@ function printListeAlpha(){
     '</div>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">Le Conseil des Enseignants</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
     designerCredit()+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html,titre);
 }
 
@@ -3376,7 +2877,7 @@ function printRecapEcole(){
     '.sb3{text-align:center;width:31%;font-size:.85em}'+
     '.sb3 .line{border-top:1px solid #333;padding-top:6px;margin-top:16mm;font-weight:700}'+
     '.emarg-cell{min-width:35mm;height:10mm}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -3404,52 +2905,7 @@ function printRecapEcole(){
       '<div class="sb3"><div class="line">Le Directeur</div></div>'+
       '<div class="sb3"><div class="line">Monsieur le Chef de Circonscription</div></div>'+
     '</div>'+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html,titreRecap);
 }
 
@@ -3672,7 +3128,7 @@ function printExResultats(){
     'tr:nth-child(even){background:#f5f5f5}'+
     '.sig{margin-top:14mm;display:flex;justify-content:space-between}'+
     '.sb{text-align:center;width:45%;border-top:1px solid #333;padding-top:5px;font-weight:700}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -3681,52 +3137,7 @@ function printExResultats(){
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th>'+matHeaders+'<th>Total</th><th>Moy/10</th><th>Rang</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(res.cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
     designerCredit()+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html,titreExRes);
 }
 
@@ -3886,7 +3297,7 @@ function printExSynoptique(exam,cid){
     'tr:nth-child(even){background:#f5f5f5}'+
     '.sig{margin-top:14mm;display:flex;justify-content:space-between}'+
     '.sb{text-align:center;width:30%;border-top:1px solid #333;padding-top:5px;font-weight:700}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -3908,52 +3319,7 @@ function printExSynoptique(exam,cid){
     matRows+
     '</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div><div class="sb">Cachet de l\'école</div></div>'+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html,titreExSynop);
 }
 
@@ -4049,7 +3415,7 @@ function PPR(cid){
     '.sig{margin-top:12mm;display:flex;justify-content:space-between;gap:6%}'+
     '.sb{text-align:center;width:44%;font-size:1em}.sb .sbtitre{display:block;font-weight:700;color:#333}.sb .sgap{display:block;height:14mm}'+
     '.sb .sbnom{display:block;border-top:1.5px solid #1a5c2a;padding-top:4px;font-weight:800;color:#111;min-height:1.4em}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -4058,52 +3424,7 @@ function PPR(cid){
     '<p class="cnt">Passent : '+c.Passe+' | Redoublent : '+c.Redouble+' | Exclus : '+c.Exclu+' | Abandons : '+c.Abandon+(c.Aucune?' | Sans décision : '+c.Aucune:'')+' | Total : '+c.total+'</p>'+
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th><th>Classe</th><th>Âge</th><th>T1</th><th>T2</th><th>T3</th><th>Moy/10</th><th>Rang</th><th>Décision</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">Le / Les Maître(s)</span><span class="sgap"></span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sgap"></span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
-    designerCredit()+'
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    designerCredit()+'</body></html>';
   OP(html,titreProp);
 }
 
@@ -4181,7 +3502,7 @@ function printEmargementConseil(){
     'tr:nth-child(even){background:#f5f5f5}'+
     '.sig{margin-top:16mm;display:flex;justify-content:space-between}'+
     '.sb{text-align:center;width:45%;border-top:1px solid #333;padding-top:5px;font-weight:700}'+
-    '</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+
+    '</style></head><body>'+
     '<div class="flagbar"><div class="f1"></div><div class="f2"></div></div>'+
     '<p class="devhdr">BURKINA FASO — La Patrie ou la Mort, nous Vaincrons !</p>'+
     '<div class="schoolname">'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</div>'+
@@ -4190,52 +3511,7 @@ function printEmargementConseil(){
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Classe</th><th>Émargement</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb">Le Directeur</div><div class="sb">Secrétaire de séance</div></div>'+
     designerCredit()+
-    '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>';
+    '</body></html>';
   OP(html, titre);
 }
 
@@ -4367,144 +3643,9 @@ function OP(html,title){
   // Le titre HTML du document est utilisé par le navigateur comme nom de fichier suggéré lors de l'impression/enregistrement en PDF
   // On insère aussi le nom du document de façon lisible juste avant la fermeture du body,
   // pour qu'il soit visible dans le PDF imprimé lui-même (indépendant du comportement du navigateur).
-  html = html.replace('<style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head>','<style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head>');
-  if(title && html.indexOf('
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body>') !== -1 && html.indexOf('class="cpage"') === -1 && html.indexOf('class="bpage') === -1){
-    html = html.replace('
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body>', docNameFooter(title) + '
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body>');
+  html = html.replace('</head>','<style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>');
+  if(title && html.indexOf('</body>') !== -1 && html.indexOf('class="cpage"') === -1 && html.indexOf('class="bpage') === -1){
+    html = html.replace('</body>', docNameFooter(title) + '</body>');
   }
   var old=document.getElementById('print-frame');
   if(old)old.remove();
@@ -5963,52 +5104,7 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
     });
     html+='</table><p style="font-size:11px">Barème CEP / 6ème — Session 2025. Règle : performance intermédiaire rapportée à la performance inférieure.</p>';
     var w=window.open('','_blank'); if(!w){ alert('Autorise les fenêtres pop-up pour imprimer.'); return; }
-    w.document.write('<html><head><title>Sport CM2</title><style>body{font-family:Arial;padding:12px}</style><style>#licence-ecran{display:none!important;visibility:hidden!important}</style></head><body>'+html+'
-<script id="edubf-v46-nav">
-(function(){
-  function goAccueil(){ try{ if(typeof G==='function') G('accueil'); }catch(e){} document.querySelectorAll('.sec').forEach(function(x){x.classList.remove('on')}); var a=document.getElementById('s-accueil'); if(a) a.classList.add('on'); window.scrollTo(0,0); }
-  function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
-  window.edubfGoAccueil = goAccueil;
-  window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
-  function addReturnButtons(){
-    document.querySelectorAll('.sec').forEach(function(sec){
-      if(sec.querySelector('.edubf-retour')) return;
-      var b=document.createElement('div');
-      b.className='edubf-retour';
-      b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
-      sec.insertBefore(b, sec.firstChild);
-    });
-  }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
-  function addPanelClose(){
-    ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
-      var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
-      var c=document.createElement('div');
-      c.className='edubf-panel-close';
-      c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
-      p.insertBefore(c, p.firstChild);
-    });
-  }
-  function initNav(){
-    addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
-  setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 4000);
-})();
-</script>
-</body></html>'); w.document.close(); setTimeout(function(){ w.print(); }, 300);
+    w.document.write('<html><head><title>Sport CM2</title><style>body{font-family:Arial;padding:12px}</style></head><body>'+html+'</body></html>'); w.document.close(); setTimeout(function(){ w.print(); }, 300);
   }
   window.EduBF_openSport=function(){ remplirClasses(); document.getElementById('edubf-sport-panel').style.display='block'; rendre(); };
   window.EduBF_noteSport=notePour;
@@ -6046,38 +5142,29 @@ document.getElementById('edubf-reg-sauver').onclick=function(){
   function closeOverlays(){ ['edubf-sport-panel','edubf-registre-panel','edubf-emarg-preview'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }); }
   window.edubfGoAccueil = goAccueil;
   window.edubfCloseOverlays = closeOverlays;
-  // Bouton Retour / Accueil dans chaque rubrique .sec
   function addReturnButtons(){
     document.querySelectorAll('.sec').forEach(function(sec){
       if(sec.querySelector('.edubf-retour')) return;
       var b=document.createElement('div');
       b.className='edubf-retour';
       b.style.cssText='display:flex;gap:8px;margin:8px 0 12px 0;';
-      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">← Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">🏠 Accueil</button>';
+      b.innerHTML='<button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800;font-size:15px">\u2190 Retour</button><button type="button" onclick="edubfCloseOverlays();edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;font-size:15px">\uD83C\uDFE0 Accueil</button>';
       sec.insertBefore(b, sec.firstChild);
     });
   }
-  // Bouton Fermer dans les panneaux Registre et Sport (ils sont en plein ecran, c'est eux qui bloquaient le retour)
   function addPanelClose(){
     ['edubf-sport-panel','edubf-registre-panel'].forEach(function(id){
       var p=document.getElementById(id); if(!p || p.querySelector('.edubf-panel-close')) return;
       var c=document.createElement('div');
       c.className='edubf-panel-close';
       c.style.cssText='display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:5;background:#fff;padding:8px;border-radius:10px;';
-      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">← Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">🏠 Accueil</button>';
+      c.innerHTML='<button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#fff;border:2px solid #1a5c2a;color:#1a5c2a;padding:12px;border-radius:10px;font-weight:800">\u2190 Retour</button><button type="button" onclick="document.getElementById(\''+id+'\').style.display=\'none\';edubfGoAccueil()" style="flex:1;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800">\uD83C\uDFE0 Accueil</button>';
       p.insertBefore(c, p.firstChild);
     });
   }
   function initNav(){
     addReturnButtons(); addPanelClose();
-    // Le bouton Retour du telephone : 1er appui = retour a l'Accueil, jamais sortie directe quand on est dans une rubrique
-    try{
-      history.pushState({edubf:1}, '');
-      window.addEventListener('popstate', function(){
-        closeOverlays(); goAccueil();
-        try{ history.pushState({edubf:1}, ''); }catch(e){}
-      });
-    }catch(e){}
+    try{ history.pushState({edubf:1}, ''); window.addEventListener('popstate', function(){ closeOverlays(); goAccueil(); try{ history.pushState({edubf:1}, ''); }catch(e){} }); }catch(e){}
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initNav); else initNav();
   setTimeout(function(){ addReturnButtons(); addPanelClose(); }, 1500);
