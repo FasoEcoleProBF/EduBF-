@@ -4481,16 +4481,18 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
       var reg=JSON.parse(localStorage.getItem('edubf_registre_12mois')||'[]');
       var trouve=null;
       for(var i=0;i<reg.length;i++){ if(reg[i] && reg[i].gmail===gmail && String(reg[i].code)===String(code)){ trouve=reg[i]; break; } }
-      // V44 : NOUVELLE INSTALLATION. Le registre est vide dans la nouvelle appli, donc le code ne peut pas être trouvé.
-      // Si le Gmail est valide et le code a 6 chiffres, on active quand même pour 12 mois et on recrée le registre localement.
-      // Ça évite le va-et-vient : entrer -> ouvrir -> retour au code.
+      // V45 : DÉBLOCAGE D'URGENCE. Si le code a 6 chiffres et le Gmail est valide, on active TOUJOURS.
+      // On ne bloque plus sur "Code incorrect" quand l'utilisateur a ouvert une ancienne icône ou que le registre est différent.
+      // La licence est créée pour 12 mois sur CE téléphone.
       if(!trouve){
-        if(reg.length===0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail) && /^[0-9]{6}$/.test(code)){
+        if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail) && /^[0-9]{6}$/.test(code)){
           var fin12=new Date(); fin12.setFullYear(fin12.getFullYear()+1);
           var finStr=fin12.toISOString().slice(0,10);
           var dev0=localStorage.getItem('edubf_device')||'';
           var entree={gmail:gmail, code:code, debut:new Date().toISOString().slice(0,10), fin:finStr, statut:'Actif', device:dev0};
-          localStorage.setItem('edubf_registre_12mois', JSON.stringify([entree]));
+          var nouveauReg=reg.filter(function(r){ return !(r && r.gmail===gmail); });
+          nouveauReg.push(entree);
+          localStorage.setItem('edubf_registre_12mois', JSON.stringify(nouveauReg));
           localStorage.setItem('edubf_licence_12mois', JSON.stringify({gmail:gmail, code:code, fin:finStr, debut:entree.debut, device:dev0}));
           localStorage.setItem('edubf_gmail', gmail);
           msg.textContent='Déverrouillé ✅ Bienvenue !'; msg.style.color='#fff';
@@ -4501,9 +4503,9 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
       }
       if(trouve.statut==='Bloque'){ msg.textContent='Cette licence est bloquée. Contacte le gestionnaire.'; return; }
       if(trouve.fin){ var f=new Date(trouve.fin); if(!isNaN(f) && f<new Date()){ msg.textContent='Cette licence est expirée.'; return; } }
-      // 1 Gmail = 1 téléphone : si le code est déjà lié à un autre téléphone, on bloque
+      // V45 : on ne bloque plus sur "déjà utilisé sur un autre téléphone" pour le déblocage.
+      // Le gestionnaire garde le contrôle, mais l'utilisateur ne reste plus coincé dehors.
       var dev=localStorage.getItem('edubf_device')||'';
-      if(trouve.device && dev && trouve.device!==dev){ msg.textContent='Ce code est déjà utilisé sur un autre téléphone. 1 Gmail = 1 téléphone.'; return; }
       // OK : on active
       if(dev) trouve.device=dev;
       localStorage.setItem('edubf_registre_12mois', JSON.stringify(reg));
@@ -4647,7 +4649,7 @@ button[style*="0a6b2e"], .btn-primary{ background:#1a9a4a !important; }
       if('caches' in window){ caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }); }
       if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); }); }
     }catch(e){}
-    var url = location.href.split('?')[0] + '?v=44&maj=' + Date.now();
+    var url = location.href.split('?')[0] + '?v=45&maj=' + Date.now();
     location.href = url;
   }
   document.addEventListener('DOMContentLoaded', function(){ cacherMotDePasse(); setTimeout(verifierMiseAJour, 800); setTimeout(cacherMotDePasse, 2000); });
