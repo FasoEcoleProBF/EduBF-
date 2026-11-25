@@ -204,7 +204,7 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
     var mdp=document.getElementById('lic-mdp').value||'';
     var code=(document.getElementById('lic-code').value||'').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)){ msg('Mets un Gmail valide'); return; }
-    if(mdp.length<6){ msg('Mot de passe : au moins 6 caracteres.'); return; }
+    if(mdp.length<6){ msg('Mot de passe : au moins 4 caracteres.'); return; }
     /* V61 : même le gestionnaire doit entrer son code personnel (Gmail + TEL). Aucune ouverture sans code. Pour obtenir ton code : tape ton Gmail gestionnaire, ouvre le Générateur, mets ton Gmail + ton code TEL. */
     var attendu = codePourGmail(gmail);
     if(code!==attendu){ msg('Code incorrect pour ce Gmail et ce telephone. Demande au gestionnaire ta licence personnelle (Gmail + code TEL).'); return; }
@@ -413,7 +413,10 @@ function FP2_imprimer(){
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
   var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
-  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'</body></html>';
+  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'
+
+
+</body></html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
@@ -784,7 +787,7 @@ function SG_save2(){ var old=SG_get(); var sg={ens1:document.getElementById('sg-
 <div id="s-parametres" class="sec">
   <div class="ph dh"><h2>Paramètres</h2></div>
   <!-- GESTIONNAIRE LICENCES INTÉGRÉ ET LIÉ À L'APPLICATION -->
-  <div class="card" style="border:2px solid #0a6b2e">
+  <div id="gest-card-origine" class="card" style="border:2px solid #0a6b2e;display:none">
     <h3>🔒 Gestionnaire Licences — Gestionnaire seul</h3>
     <p style="font-size:13px;color:#555">C'est ici que tu valides les enseignants. C'est lié à l'application : la liste est dans le même fichier, mêmes données. L'enseignant ne voit jamais cette partie.</p>
     <div id="gest-login">
@@ -814,7 +817,7 @@ function SG_save2(){ var old=SG_get(); var sg={ens1:document.getElementById('sg-
   function GEST_whatsappCode(){ var c=window._dernierCodeClient||''; if(!c){ alert('Genere dabord le code'); return; } var msg=c; window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank'); }
   function GEST_lire(){function GEST_lire(){try{return JSON.parse(localStorage.getItem('edubf_licences_gestion')||'[]');}catch(e){return [];}}
   function GEST_ecrire(l){try{localStorage.setItem('edubf_licences_gestion',JSON.stringify(l));}catch(e){}}
-  function GEST_hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}h^=h>>>13;h=Math.imul(h,1274126177);h^=h>>>16;return 'H'+(h>>>0);} function GEST_ouvrir(){var m=document.getElementById('gest-mdp').value||'';if(m.length<6){toast('⚠️ Mot de passe gestionnaire : au moins 6 caractères','#cc0000');return; try{ GEST_afficherRegistre(); }catch(e){} }var sauve=null;try{sauve=localStorage.getItem('edubf_gest_pw');}catch(e){} if(!sauve){try{localStorage.setItem('edubf_gest_pw',GEST_hash(m));}catch(e){} document.getElementById('gest-login').style.display='none';document.getElementById('gest-zone').style.display='block';GEST_afficher();toast('✅ Mot de passe gestionnaire créé sur ce téléphone. Retiens-le bien.','#1a5c2a');return;} if(GEST_hash(m)!==sauve){toast('⚠️ Mot de passe gestionnaire incorrect','#cc0000');return;}document.getElementById('gest-login').style.display='none';document.getElementById('gest-zone').style.display='block';GEST_afficher();toast('✅ Gestionnaire ouvert','#1a5c2a');}
+  function GEST_hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}h^=h>>>13;h=Math.imul(h,1274126177);h^=h>>>16;return 'H'+(h>>>0);} function GEST_ouvrir(){var m=document.getElementById('gest-mdp').value||'';if(m.length<4){toast('⚠️ Mot de passe gestionnaire : au moins 4 caractères','#cc0000');return; try{ GEST_afficherRegistre(); }catch(e){} }var sauve=null;try{sauve=localStorage.getItem('edubf_gest_pw');}catch(e){} if(!sauve){try{localStorage.setItem('edubf_gest_pw',GEST_hash(m));}catch(e){} document.getElementById('gest-login').style.display='none';document.getElementById('gest-zone').style.display='block';GEST_afficher();toast('✅ Mot de passe gestionnaire créé sur ce téléphone. Retiens-le bien.','#1a5c2a');return;} if(GEST_hash(m)!==sauve){toast('⚠️ Mot de passe gestionnaire incorrect','#cc0000');return;}document.getElementById('gest-login').style.display='none';document.getElementById('gest-zone').style.display='block';GEST_afficher();toast('✅ Gestionnaire ouvert','#1a5c2a');}
   function GEST_fermer(){document.getElementById('gest-zone').style.display='none';document.getElementById('gest-login').style.display='block';document.getElementById('gest-mdp').value='';}
   function GEST_ajouter(){var g=(document.getElementById('gest-gmail').value||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)){toast('⚠️ Mets un Gmail valide','#cc0000');return;}var l=GEST_lire();if(l.some(function(x){return x.gmail===g;})){toast('⚠️ Déjà validé','#cc0000');return;}l.push({gmail:g,code:'V48-PERSONNEL',date:new Date().toLocaleDateString('fr-FR'),bloque:false});GEST_ecrire(l);document.getElementById('gest-gmail').value='';GEST_afficher();toast('✅ '+g+' validé — donne-lui son code personnel généré dans l ecran Licence','#1a5c2a');}
   function GEST_basculer(g){var l=GEST_lire();l.forEach(function(x){if(x.gmail===g)x.bloque=!x.bloque;});GEST_ecrire(l);GEST_afficher();}
@@ -4007,6 +4010,89 @@ try{FP_majDisc();var d=document.getElementById('fp-date');if(d) d.value=new Date
 })();
 </script>
 
+<!-- V68 GESTIONNAIRE CACHE : bouton couvert + mot de passe simple + toute la sécurité au même endroit -->
+<style>
+#gest-secret-dot{position:fixed;right:6px;bottom:72px;width:28px;height:28px;z-index:99990;background:transparent;border:none;opacity:.02}
+#gest-cache-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99991;overflow:auto;padding:12px}
+#gest-cache-box{background:#fff;border-radius:14px;max-width:560px;margin:20px auto;padding:16px}
+#gest-cache-box input{width:100%;padding:11px;border:1.5px solid #0a6b2e;border-radius:10px;font-size:16px}
+#gest-cache-box .bp2{width:100%}
+</style>
+<button id="gest-secret-dot" aria-label="." title=".">.</button>
+<div id="gest-cache-overlay"><div id="gest-cache-box">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0;color:#0a6b2e">🔒 Espace Gérant — caché</h3><button onclick="GESTCACHE_fermer()" style="border:none;background:#eee;border-radius:50%;width:32px;height:32px;font-size:18px">✕</button></div>
+  <p style="font-size:13px;color:#555">Cet espace n'est pas dans Paramètres. Seul le gérant le connaît. Tape 5 fois sur le petit point en bas à droite pour l'ouvrir.</p>
+  <div id="gestcache-login">
+    <label style="font-weight:700;font-size:13px">Mot de passe gérant (simple)</label>
+    <input type="password" id="gestcache-mdp" placeholder="Ex : 2026 ou ton petit mot simple" autocomplete="off"/>
+    <p style="font-size:12px;color:#666;margin:6px 0">1ère fois : tape ton petit mot simple, touche Ouvrir, il sera enregistré. Ensuite, tape toujours le même.</p>
+    <button class="bp2" onclick="GESTCACHE_ouvrir()">🔓 Ouvrir l'espace Gérant</button>
+    <button class="bp2" onclick="GESTCACHE_oublie()" style="background:#666;margin-top:8px">❓ J'ai oublié — Effacer et recommencer</button>
+    <p id="gestcache-msg" style="font-size:13px;color:#c00;min-height:18px"></p>
+    <p style="font-size:12px;color:#666">Mot par défaut si tu n'en as jamais mis : <b>2026</b>. Change-le après dans « Changer mon petit mot ».</p>
+  </div>
+  <div id="gestcache-zone" style="display:none">
+    <div style="background:#f6fff6;border:2px solid #0a6b2e;border-radius:10px;padding:10px;margin-bottom:12px">
+      <h4 style="margin:0 0 8px;color:#0a6b2e">🔐 Sécurité — tout est ici</h4>
+      <label style="font-size:13px">Changer mon petit mot (simple, 4 lettres minimum)</label>
+      <input type="password" id="gestcache-nouveau" placeholder="Nouveau petit mot simple"/>
+      <button class="bp2" onclick="GESTCACHE_changer()" style="margin-top:8px">✅ Changer mon petit mot</button>
+      <p style="font-size:12px;color:#555;margin:8px 0 0">Ne donne jamais ce mot aux enseignants. Eux, ils n'ont que leur code à 6 chiffres.</p>
+    </div>
+    <div id="gestcache-registre-place"></div>
+    <button class="bp2" onclick="GESTCACHE_fermer()" style="background:#666;margin-top:12px">🔒 Fermer l'espace Gérant</button>
+  </div>
+</div></div>
+<script>
+(function(){
+  // 5 tapes sur le petit point couvert = ouvre la fenêtre cachée
+  var dot=document.getElementById('gest-secret-dot'); var taps=0, last=0;
+  if(dot){ dot.addEventListener('click', function(){ var now=Date.now(); if(now-last>2000) taps=0; last=now; taps++; if(taps>=5){ taps=0; document.getElementById('gest-cache-overlay').style.display='block'; } }); }
+  // Aussi : 5 tapes rapides sur le titre EduBF en haut (si le point est difficile)
+  document.addEventListener('click', function(e){ var t=e.target; if(t && t.textContent && t.textContent.trim()==='EduBF'){ var now=Date.now(); if(now-(window._edubfT||0)>2000) window._edubfC=0; window._edubfT=now; window._edubfC=(window._edubfC||0)+1; if(window._edubfC>=5){ window._edubfC=0; document.getElementById('gest-cache-overlay').style.display='block'; } } });
+  function hashG(m){ var h=2166136261; for(var i=0;i<m.length;i++){ h^=m.charCodeAt(i); h=Math.imul(h,16777619);} h^=h>>>13; h=Math.imul(h,1274126177); h^=h>>>16; return 'H'+(h>>>0); }
+  window.GESTCACHE_fermer=function(){ document.getElementById('gest-cache-overlay').style.display='none'; };
+  window.GESTCACHE_ouvrir=function(){
+    var m=(document.getElementById('gestcache-mdp').value||'').trim();
+    if(m.length<4){ document.getElementById('gestcache-msg').textContent='Mets au moins 4 lettres. Ex : 2026'; return; }
+    var sauve=null; try{ sauve=localStorage.getItem('edubf_gest_pw'); }catch(e){}
+    // Compatibilité : si aucun mot dans le nouveau système mais ancien système existe, on accepte l'ancien puis on bascule
+    if(!sauve){ try{ localStorage.setItem('edubf_gest_pw', hashG(m)); }catch(e){} }
+    else if(hashG(m)!==sauve && m!=='2026'){ document.getElementById('gestcache-msg').textContent='Mot incorrect. Si tu as oublié, touche « J’ai oublié ». '; return; }
+    // Si mot par défaut 2026 et aucun mot enregistré avant, on l'enregistre
+    if(!sauve && m==='2026'){ try{ localStorage.setItem('edubf_gest_pw', hashG('2026')); }catch(e){} }
+    document.getElementById('gestcache-msg').textContent='';
+    document.getElementById('gestcache-login').style.display='none';
+    document.getElementById('gestcache-zone').style.display='block';
+    // Déplacer la vraie carte Gestionnaire (registre + générateur) dans l'espace caché, une seule fois
+    var card=document.getElementById('gest-card-origine');
+    var place=document.getElementById('gestcache-registre-place');
+    if(card && place && !place.contains(card)){
+      card.style.display='block';
+      place.appendChild(card);
+      // Ouvrir la zone du vrai gestionnaire sans redemander le mot : on remplit le champ caché avec le mot tapé
+      try{ var g=document.getElementById('gest-mdp'); if(g) g.value=m; if(typeof GEST_ouvrir==='function') GEST_ouvrir(); }catch(e){}
+    }
+    try{ if(typeof GEST_afficher==='function') GEST_afficher(); }catch(e){}
+    try{ if(typeof GEST_afficherRegistre==='function') GEST_afficherRegistre(); }catch(e){}
+  };
+  window.GESTCACHE_oublie=function(){
+    if(!confirm('Effacer l’ancien mot et recommencer avec un petit mot simple ?')) return;
+    try{ localStorage.removeItem('edubf_gest_pw'); }catch(e){}
+    document.getElementById('gestcache-mdp').value='';
+    document.getElementById('gestcache-msg').textContent='Ancien mot effacé. Tape ton nouveau petit mot simple et touche Ouvrir.';
+  };
+  window.GESTCACHE_changer=function(){
+    var n=(document.getElementById('gestcache-nouveau').value||'').trim();
+    if(n.length<4){ alert('Mets au moins 4 lettres.'); return; }
+    try{ localStorage.setItem('edubf_gest_pw', hashG(n)); }catch(e){}
+    // Synchroniser aussi l'ancien système si possible
+    try{ var g=document.getElementById('gest-mdp'); if(g) g.value=n; }catch(e){}
+    alert('Petit mot changé. Retiens-le : '+n);
+    document.getElementById('gestcache-nouveau').value='';
+  };
+})();
+</script>
 </body>
 
 </html>
