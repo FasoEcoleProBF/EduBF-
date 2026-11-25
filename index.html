@@ -4098,6 +4098,36 @@ try{FP_majDisc();var d=document.getElementById('fp-date');if(d) d.value=new Date
   };
 })();
 </script>
+
+<script>
+/* V68d FIX RAPIDE : UN SEUL MOT. Le bouton "Ouvrir le Gestionnaire" ne redemande plus de mot. Tu es déjà entré avec ton petit mot, c'est assez. */
+(function(){
+  function ouvrirVrai(){
+    try{
+      var login=document.getElementById('gest-login');
+      if(login) login.style.display='none';
+      var zone=document.getElementById('gest-zone');
+      if(zone) zone.style.display='block';
+      if(typeof GEST_afficher==='function') GEST_afficher();
+      if(typeof GEST_afficherRegistre==='function') GEST_afficherRegistre();
+      // Petit message visible dans la zone
+      var z=document.getElementById('gest-liste');
+      if(z && !z.innerHTML) { }
+    }catch(e){}
+  }
+  window.GEST_ouvrir = ouvrirVrai;
+  // Si on clique sur le bouton bleu, on ouvre même si l'ancien code bloque
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    if(!t) return;
+    var btn = t.closest ? t.closest('button') : null;
+    if(btn && btn.textContent && btn.textContent.indexOf('Ouvrir le Gestionnaire')!==-1){
+      e.stopPropagation();
+      ouvrirVrai();
+    }
+  }, true);
+})();
+</script>
 </body>
 
 </html>
