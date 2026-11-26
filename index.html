@@ -167,11 +167,11 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
-<!-- LICENCE EduBFv2 : 1 compte = 1 téléphone, validation gestionnaire -->
+<!-- LICENCE EduBFv2 -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
     <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 — Licence</h2>
-    <p style="text-align:center;font-size:13px;color:#555;margin:0 0 14px">1 compte = 1 téléphone. Seul le gestionnaire valide.</p>
+    <p style="text-align:center;font-size:11px;color:#999;margin:0 0 14px">Licence personnelle</p>
     <div id="licence-msg" style="display:none;background:#ffe9e9;border:1px solid #cc0000;color:#a00;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
     <label style="font-weight:700;font-size:13px">Gmail de l'enseignant</label>
     <input id="lic-gmail"  type="email" placeholder="exemple@gmail.com" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
@@ -179,11 +179,11 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
     <input id="lic-mdp" type="password" placeholder="Au moins 6 caractères" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
     <label style="font-weight:700;font-size:13px">Code du gestionnaire</label>
     <input id="lic-code" type="text" placeholder="Code donné par le gestionnaire" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
-    <p style="font-size:12px;color:#666;margin:0 0 12px">Seule une licence creee par le gestionnaire pour TON Gmail et TON telephone ouvre EduBF.</p>
+    <p style="font-size:12px;color:#666;margin:0 0 12px">Entre tes informations pour ouvrir EduBF.</p>
     <button onclick="LIC_valider()" style="width:100%;background:#0a6b2e;color:#fff;border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer">✅ Valider ma licence</button>
     <p id="lic-info" style="font-size:12px;color:#666;text-align:center;margin-top:12px"></p>
      <div style="display:flex;gap:8px;margin-top:8px"><button type="button" onclick="LIC_copierTEL()" style="flex:1;background:#444;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:800">📋 Copier mon code TEL</button><button type="button" onclick="LIC_whatsappGestionnaire()" style="flex:1;background:#25D366;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:800">💬 Envoyer sur WhatsApp</button></div>
-     <p style="font-size:12px;color:#666;text-align:center;margin-top:6px">À distance : touche WhatsApp, envoie ton Gmail + ton code TEL au gestionnaire. Il te renvoie ton code à 6 chiffres.</p>
+     <p style="font-size:12px;color:#666;text-align:center;margin-top:6px">Touche WhatsApp pour envoyer tes informations au gestionnaire.</p>
   </div>
 </div>
 <script> (function(){
@@ -414,6 +414,7 @@ function FP2_imprimer(){
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
   var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
   var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'
+
 
 
 
@@ -802,7 +803,7 @@ function SG_save2(){ var old=SG_get(); var sg={ens1:document.getElementById('sg-
       <div id="gest-liste" style="margin-top:12px"></div>
       <div style="border:2px dashed #0a6b2e;border-radius:10px;padding:10px;margin-top:12px;background:#f6fff6"><p style="font-weight:800;margin:0 0 8px">✨ Générateur à distance — pour toi seul</p><p style="font-size:12px;color:#555;margin:0 0 8px">Le client t\u0027envoie son Gmail + son code TEL sur WhatsApp. Tu mets les 2 ici, tu touches Générer, puis tu lui renvoies le code sur WhatsApp.</p><div class="fg"><label>Gmail du client</label><input type="text" id="gest-gen-gmail" placeholder="client@gmail.com"/></div><div class="fg"><label>Code TEL du client</label><input type="text" id="gest-gen-tel" placeholder="TEL-........"/></div><button class="bp2" onclick="GEST_genererCode()">🔢 Générer le code à 6 chiffres</button><p id="gest-gen-result" style="font-size:16px;font-weight:800;margin-top:10px;background:#eaffea;border:2px solid #0a6b2e;border-radius:10px;padding:12px"></p><div style="display:flex;gap:8px;margin-top:6px"><button class="bp2" onclick="GEST_copierCode()" style="background:#444">📋 Copier le code</button><button class="bp2" onclick="GEST_whatsappCode()" style="background:#25D366">💬 Envoyer le code sur WhatsApp</button></div>
       <div style="margin-top:14px"><h4 style="margin:0 0 8px;color:#0a6b2e">Registre des licences emises</h4><div id="gest-registre"></div></div></div>
-      <p style="font-size:12px;color:#666;margin-top:10px">Code à donner : va dans l'écran Licence, tape ton Gmail gestionnaire, puis Générateur, mets le Gmail + le code TEL du client. Le code est différent pour chaque téléphone.<br>1 compte = 1 téléphone. Pour débloquer un enseignant qui a changé de téléphone, touche <b>Débloquer</b> dans la liste.</p>
+      <p style="font-size:12px;color:#666;margin-top:10px">Code à donner : va dans l'écran Licence, tape ton Gmail gestionnaire, puis Générateur, mets le Gmail + le code TEL du client. Pour débloquer un enseignant qui a changé de téléphone, touche <b>Débloquer</b> dans la liste.</p>
       <button class="bp2" onclick="GEST_fermer()" style="background:#666">🔒 Fermer le Gestionnaire</button>
     </div>
   </div>
@@ -4126,6 +4127,89 @@ try{FP_majDisc();var d=document.getElementById('fp-date');if(d) d.value=new Date
       ouvrirVrai();
     }
   }, true);
+})();
+</script>
+
+<script>
+function EDUBF_creerRegistreDansGestionnaire(){
+  try{
+    var place=document.getElementById('gestcache-registre-place'); if(!place) return;
+    if(document.getElementById('edubf-registre-licences')) return;
+    place.innerHTML='<div id="edubf-registre-licences" style="padding:10px;border:2px solid #0a6b2e;border-radius:10px;background:#f6fff6">'
+    +'<h4 style="margin:0 0 8px;color:#0a6b2e">📋 Registre des licences émises</h4>'
+    +'<p style="font-size:12px;color:#555;margin:0 0 8px">Seul le gestionnaire voit ce registre. Chaque licence validée s’ajoute ici.</p>'
+    +'<div id="edubf-registre-liste" style="font-size:12px;color:#222">Aucune licence enregistrée pour le moment.</div>'
+    +'<button class="bp2" onclick="EDUBF_voirRegistre()" style="margin-top:8px;background:#0a6b2e">🔄 Actualiser le registre</button></div>';
+  }catch(e){}
+}
+function EDUBF_voirRegistre(){
+  EDUBF_creerRegistreDansGestionnaire();
+  try{
+    var list=[]; try{ list=JSON.parse(localStorage.getItem('edubf_registre_licences')||'[]'); }catch(e){ list=[]; }
+    var z=document.getElementById('edubf-registre-liste'); if(!z) return;
+    if(!list.length){ z.textContent='Aucune licence enregistrée pour le moment.'; return; }
+    var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr><th style="text-align:left;border-bottom:1px solid #ccc">Date</th><th style="text-align:left;border-bottom:1px solid #ccc">Gmail</th><th style="text-align:left;border-bottom:1px solid #ccc">TEL</th></tr>';
+    list.slice(-50).reverse().forEach(function(r){ h+='<tr><td style="padding:4px 2px;border-bottom:1px solid #eee">'+(r.date||'')+'</td><td style="padding:4px 2px;border-bottom:1px solid #eee">'+(r.gmail||'')+'</td><td style="padding:4px 2px;border-bottom:1px solid #eee">'+(r.tel||'')+'</td></tr>'; });
+    h+='</table>'; z.innerHTML=h;
+  }catch(e){}
+}
+window.EDUBF_voirRegistre=EDUBF_voirRegistre;
+document.addEventListener('click', function(e){
+  var b=e.target && e.target.closest ? e.target.closest('button') : null;
+  if(b && b.textContent && b.textContent.indexOf('Valider ma licence')!==-1){
+    setTimeout(function(){
+      try{
+        var lic=JSON.parse(localStorage.getItem('edubf_licence_v48')||'null'); if(!lic||!lic.gmail) return;
+        var list=JSON.parse(localStorage.getItem('edubf_registre_licences')||'[]');
+        var deja=list.some(function(r){ return r.gmail===lic.gmail && r.tel===lic.device; });
+        if(!deja){ list.push({gmail:lic.gmail, tel:lic.device||'', date:new Date().toLocaleDateString('fr-FR')}); localStorage.setItem('edubf_registre_licences', JSON.stringify(list)); }
+        EDUBF_voirRegistre();
+      }catch(err){}
+    }, 800);
+  }
+});
+setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 1500);
+setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
+</script>
+
+<script>
+// LOT 2 - IMPRESSION SANS APPSGEYSER : on ne passe plus par Télécharger / OPEN FILE / SAVE FILE qui fait planter.
+// On affiche le document dans l'application, avec un bouton Imprimer qui utilise l'impression du téléphone.
+(function(){
+  // Neutralise l'ancien bouton Télécharger qui ouvrait la fenêtre AppsGeyser
+  window.showDownloadFallback = function(){};
+  var OP_ancien = window.OP;
+  window.OP = function(html, title){
+    try{
+      var old=document.getElementById('edubf-print-overlay'); if(old) old.remove();
+      var old2=document.getElementById('dl-fallback'); if(old2) old2.remove();
+      var old3=document.getElementById('print-frame'); if(old3) old3.remove();
+      // Ajoute style impression
+      try{ html = html.replace('</head>','<style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>'); }catch(e){}
+      var overlay=document.createElement('div');
+      overlay.id='edubf-print-overlay';
+      overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#fff;display:flex;flex-direction:column';
+      overlay.innerHTML='<div style="display:flex;gap:8px;padding:10px;background:#0a6b2e;color:#fff;align-items:center">'
+        +'<span style="flex:1;font-weight:700;font-size:14px">📄 '+(title||'Document')+'</span>'
+        +'<button id="edubf-print-btn" style="background:#fff;color:#0a6b2e;border:none;border-radius:8px;padding:10px 14px;font-weight:700">🖨️ Imprimer</button>'
+        +'<button id="edubf-print-close" style="background:#333;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-weight:700">✕ Fermer</button></div>'
+        +'<div style="padding:8px;background:#f0f0f0;font-size:12px;color:#333">Vérifie ton document ici. Touche <b>Imprimer</b> pour imprimer ou enregistrer en PDF avec le téléphone. Ne touche plus à Télécharger.</div>';
+      var frame=document.createElement('iframe');
+      frame.style.cssText='flex:1;width:100%;border:none;background:#fff';
+      overlay.appendChild(frame);
+      document.body.appendChild(overlay);
+      var doc=frame.contentWindow.document; doc.open(); doc.write(html); doc.close();
+      try{ if(title) doc.title=title; }catch(e){}
+      document.getElementById('edubf-print-close').onclick=function(){ overlay.remove(); };
+      document.getElementById('edubf-print-btn').onclick=function(){
+        try{ frame.contentWindow.focus(); frame.contentWindow.print(); }catch(e){ alert('Touche Imprimer de nouveau, ou utilise le menu du téléphone.'); }
+      };
+      // Petit délai : on laisse le document se charger, on n'ouvre PAS la fenêtre Télécharger
+    }catch(e){
+      // Si ça échoue, on retombe sur l'ancienne méthode sans le Télécharger
+      try{ if(OP_ancien) OP_ancien(html,title); }catch(err){}
+    }
+  };
 })();
 </script>
 </body>
