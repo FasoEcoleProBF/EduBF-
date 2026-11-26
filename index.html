@@ -4193,6 +4193,7 @@ setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
         +'<span style="flex:1;font-weight:700;font-size:14px">📄 '+(title||'Document')+'</span>'
         +'<button id="edubf-print-btn" style="background:#fff;color:#0a6b2e;border:none;border-radius:8px;padding:10px 14px;font-weight:700">🖨️ Imprimer</button>'
         +'<button id="edubf-print-chrome" style="background:#1565c0;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-weight:700">🌐 Ouvrir dans Chrome</button>'
+        +'<button id="edubf-print-share" style="background:#ff9800;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-weight:700">📤 Partager / PDF</button>'
         +'<button id="edubf-print-close" style="background:#333;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-weight:700">✕ Fermer</button></div>'
         +'<div style="padding:8px;background:#f0f0f0;font-size:12px;color:#333">Vérifie ton document ici. Touche <b>Imprimer</b> pour imprimer ou enregistrer en PDF avec le téléphone. Ne touche plus à Télécharger.</div>';
       var frame=document.createElement('iframe');
@@ -4202,6 +4203,19 @@ setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
       var doc=frame.contentWindow.document; doc.open(); doc.write(html); doc.close();
       try{ if(title) doc.title=title; }catch(e){}
       document.getElementById('edubf-print-close').onclick=function(){ overlay.remove(); };
+      document.getElementById('edubf-print-share').onclick=function(){
+        try{
+          var blob=new Blob([html], {type:'text/html'});
+          var file=new File([blob], (title||'EduBF')+'.html', {type:'text/html'});
+          if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+            navigator.share({title:title||'EduBF', files:[file]}).catch(function(){ alert('Choisis Imprimer ou Enregistrer en PDF dans la liste qui va s’ouvrir.'); });
+          } else if(navigator.share){
+            navigator.share({title:title||'EduBF', text:'Document EduBF : '+(title||'')}).catch(function(){});
+          } else {
+            alert('Ton téléphone ne permet pas Partager. Touche Ouvrir dans Chrome, puis Imprimer là-bas.');
+          }
+        }catch(e){ alert('Touche Ouvrir dans Chrome pour imprimer.'); }
+      };
       document.getElementById('edubf-print-chrome').onclick=function(){
         try{
           var w=window.open('', '_blank');
