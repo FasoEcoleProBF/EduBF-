@@ -167,10 +167,10 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
-<!-- LICENCE EduBFv2 - V65 -->
+<!-- LICENCE EduBFv2 - V66 -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
-    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V65 — Licence</h2>
+    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V66 — Licence</h2>
     <p style="text-align:center;font-size:11px;color:#999;margin:0 0 14px">Licence personnelle</p>
     <div id="licence-msg" style="display:none;background:#ffe9e9;border:1px solid #cc0000;color:#a00;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
     <label style="font-weight:700;font-size:13px">Gmail de l'enseignant</label>
@@ -419,300 +419,56 @@ function FP2_imprimer(){
 
 
 
-<!-- PATCH V63 : Impression Chrome + Nommage + Registre + Code caché + Hors réseau + Blocage sans code -->
+<!-- PATCH V66 : Plus de bouton collé, plus d'écran blanc -->
+<style>body{padding-bottom:90px !important}</style>
 <script>
 (function(){
-  // ---- 1. Nommer les documents imprimables ----
-  function nomDoc(){
-    try{
-      var classe = (document.querySelector('select') && document.querySelector('select').value) || 'Classe';
-      var d = new Date();
-      var dateStr = d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
-      var titre = 'EduBF_'+String(classe).replace(/[^A-Za-z0-9_-]/g,'_')+'_'+dateStr;
-      document.title = titre;
-      return titre;
-    }catch(e){ return 'EduBF_Document'; }
-  }
-  window.EduBF_nomDoc = nomDoc;
-  // Avant impression, on nomme
-  window.addEventListener('beforeprint', nomDoc);
-  var _oldPrint = window.print;
-  window.print = function(){ nomDoc(); try{ _oldPrint(); }catch(e){} };
-
-  // ---- 2. Bouton Ouvrir dans Chrome qui fonctionne vraiment ----
-  function ouvrirChrome(){
-    nomDoc();
-    var url = location.href;
-    // On copie le lien pour que l'utilisateur le retrouve
-    try{ if(navigator.clipboard) navigator.clipboard.writeText(url); }catch(e){}
-    // On essaie d'ouvrir dans Chrome : nouvel onglet
-    var w = window.open(url, '_blank');
-    if(!w){
-      alert('Lien copié !\n\n1. Ouvre Chrome\n2. Colle le lien en haut\n3. Tu verras EduBF\n4. Touche Imprimer dans Chrome\n\nLe fichier PDF va dans : Téléchargements / Download\nNom : ' + document.title + '.pdf');
-    } else {
-      setTimeout(function(){
-        alert('EduBF ouvert dans Chrome.\n\nPour imprimer :\n1. Dans Chrome, touche Imprimer\n2. Choisis : Enregistrer en PDF\n3. Le fichier se nomme : ' + document.title + '\n\nPour le retrouver :\nChrome > 3 petits points > Téléchargements\nou Mes fichiers > Téléchargements');
-      }, 800);
-    }
-  }
-  window.EduBF_ouvrirChrome = ouvrirChrome;
-  // On branche tous les boutons qui parlent de Chrome
-  document.addEventListener('click', function(e){
-    var b = e.target.closest('button, a');
-    if(!b) return;
-    var t = (b.textContent||'').toLowerCase();
-    if(t.indexOf('ouvrir dans chrome')>=0 || t.indexOf('chrome')>=0 && t.indexOf('ouvrir')>=0){
-      e.preventDefault(); e.stopPropagation(); ouvrirChrome();
-    }
-  }, true);
-
-  // ---- 3. Bouton Retrouver mon fichier + Aide impression ----
-  function aideFichier(){
-    alert('Où est mon fichier imprimé ?\n\nDans Chrome :\n1. Touche les 3 petits points en haut à droite\n2. Touche Téléchargements\n3. Tu vois : ' + document.title + '.pdf\n\nDans le téléphone :\nMes fichiers > Téléchargements > ' + document.title + '.pdf\n\nPour imprimer recto-verso :\nDonne ce PDF à l’imprimeur et dis : Recto-verso.');
-  }
-  window.EduBF_aideFichier = aideFichier;
-
-  // Ajoute un bouton aide en haut de page si absent
-  setTimeout(function(){
-    if(document.getElementById('edubf-aide-fichier')) return;
-    var div = document.createElement('div');
-    div.id='edubf-aide-fichier';
-    div.style.cssText='position:fixed;bottom:12px;right:12px;z-index:9999;display:flex;gap:6px;';
-    div.innerHTML = '<button onclick="EduBF_ouvrirChrome()" style="background:#2563eb;color:#fff;border:0;padding:10px 12px;border-radius:20px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3)">Ouvrir dans Chrome</button>'
-      + '<button onclick="EduBF_aideFichier()" style="background:#f59e0b;color:#fff;border:0;padding:10px 12px;border-radius:20px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3)">Où est mon fichier ?</button>'
-      + '<button onclick="EduBF_retour()" style="background:#16a34a;color:#fff;border:0;padding:10px 12px;border-radius:20px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3)">← Retour</button>';
-    document.body.appendChild(div);
-  }, 800);
-  window.EduBF_retour = function(){ try{ history.back(); }catch(e){} if(document.referrer) location.href=document.referrer; };
-
-  // ---- 4. Registre des licences dans Gestionnaire ----
-  function getRegistre(){ try{ return JSON.parse(localStorage.getItem('edubf_licences_register')||'[]'); }catch(e){ return []; } }
-  function saveRegistre(r){ localStorage.setItem('edubf_licences_register', JSON.stringify(r)); }
-  window.EduBF_getRegistre = getRegistre;
-  // Exemple : si un code est généré, on l'ajoute au registre (sans l'afficher en clair ailleurs)
-  window.EduBF_ajouterLicence = function(gmail, tel, code){
-    var r = getRegistre();
-    r.push({gmail:gmail||'', tel:tel||'', code:code||'', date:new Date().toLocaleDateString('fr-FR'), statut:'Active'});
-    saveRegistre(r);
-    return r;
-  };
-  // Masquer les codes affichés : on remplace 6 chiffres visibles par ******
-  function masquerCodes(){
-    document.querySelectorAll('[data-code], .code-licence').forEach(function(el){
-      if(el.dataset.masked) return;
-      el.dataset.masked='1';
-      el.dataset.vraiCode = el.textContent.trim();
-      el.textContent = '••••••';
-      el.title = 'Code caché - seul le gestionnaire peut voir';
+  // 1. Enlever toutes les barres collées qui bloquaient l'écran
+  function nettoyer(){
+    ['edubf-v64-bar','edubf-aide-fichier'].forEach(function(id){
+      var e=document.getElementById(id); if(e) e.remove();
     });
-  }
-  setInterval(masquerCodes, 2000);
-
-  // ---- 5. Mode hors réseau ----
-  try{
-    if(!localStorage.getItem('edubf_offline')) localStorage.setItem('edubf_offline','1');
-    // Toutes les données restent dans le téléphone (localStorage) = déjà hors réseau
-    window.addEventListener('online', function(){});
-    window.addEventListener('offline', function(){ alert('Mode hors réseau activé : EduBF continue de marcher sans internet. Tes données sont dans ton téléphone.'); });
-  }catch(e){}
-
-  // ---- 6. Bloquer les licences sans code ----
-  function verifierLicenceSansCode(){
-    try{
-      var lic = null;
-      // On cherche une licence stockée
-      ['edubf_licence','edubf_license','licence','EduBF_licence'].forEach(function(k){
-        if(!lic){ try{ lic = JSON.parse(localStorage.getItem(k)||'null'); }catch(e){} }
-      });
-      if(lic && (!lic.code || lic.code==='' || lic.code==='SANS CODE')){
-        // On bloque : écran verrouillé
-        if(document.getElementById('edubf-blocage')) return;
-        var overlay = document.createElement('div');
-        overlay.id='edubf-blocage';
-        overlay.style.cssText='position:fixed;inset:0;background:#0f172a;z-index:100000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;';
-        overlay.innerHTML = '<h2 style="font-size:22px">🔒 Licence bloquée</h2>'
-          + '<p>Ta licence a été donnée sans code.<br>Pour continuer, entre le code à 6 chiffres donné par le gestionnaire.</p>'
-          + '<input id="edubf-code-blocage" placeholder="Code à 6 chiffres" style="padding:12px;border-radius:10px;border:0;width:220px;text-align:center;font-size:18px;margin:10px 0" inputmode="numeric">'
-          + '<button id="edubf-valider-blocage" style="background:#16a34a;color:#fff;border:0;padding:12px 20px;border-radius:10px;font-weight:700">Valider mon code</button>'
-          + '<p id="edubf-msg-blocage" style="color:#fbbf24;min-height:20px"></p>'
-          + '<p style="font-size:13px;opacity:.8">Pas de code ? Contacte le gestionnaire sur WhatsApp.<br>Il va vérifier ton nom dans son registre.</p>';
-        document.body.appendChild(overlay);
-        document.getElementById('edubf-valider-blocage').onclick = function(){
-          var c = document.getElementById('edubf-code-blocage').value.trim();
-          var reg = getRegistre();
-          var ok = reg.some(function(x){ return String(x.code).trim()===c; });
-          // Si le gestionnaire n'a pas encore de registre sur ce téléphone, on accepte seulement un code à 6 chiffres que le gestionnaire confirmera après
-          // Pour ne pas bloquer le gestionnaire lui-même, on demande aussi le mot de passe gestionnaire en secours
-          if(c.length===6 && /^[0-9]+$/.test(c) && (ok || confirm('Ce code n’est pas encore dans le registre de ce téléphone. Le gestionnaire doit le valider. Continuer ?'))){
-            lic.code = c; lic.statut='Active';
-            localStorage.setItem('edubf_licence', JSON.stringify(lic));
-            window.EduBF_ajouterLicence(lic.gmail||'', lic.tel||'', c);
-            overlay.remove();
-            alert('Merci ! Licence débloquée avec le code ' + c + '. Le gestionnaire va vérifier dans son registre.');
-          } else {
-            document.getElementById('edubf-msg-blocage').textContent = 'Code incorrect. Vérifie les 6 chiffres.';
-          }
-        };
-      }
-    }catch(e){}
-  }
-  setTimeout(verifierLicenceSansCode, 1500);
-  setInterval(verifierLicenceSansCode, 10000);
-})();
-</script>
-
-<!-- PATCH V64 : Force Chrome via intent:// car window.print() est bloqué dans AppsGeyser -->
-<script>
-(function(){
-  function urlEduBF(){ return 'https://fasoecoleprobf.github.io/EduBF-/'; }
-  function ouvrirChromeForce(){
-    var titre = document.title || 'EduBF_Cartes_CM2';
-    // 1. On sauvegarde la page actuelle pour retrouver après
-    try{ localStorage.setItem('edubf_dernier_doc', titre); }catch(e){}
-    // 2. Lien qui force Chrome à s'ouvrir même depuis l'application AppsGeyser
-    var intentUrl = 'intent://fasoecoleprobf.github.io/EduBF-/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(urlEduBF()) + ';end';
-    // On essaie intent d'abord
-    window.location.href = intentUrl;
-    // Secours après 1.5s si intent bloqué : ouvrir nouvel onglet
-    setTimeout(function(){
-      try{ window.open(urlEduBF(), '_blank'); }catch(e){}
-      alert('Si Chrome ne s’est pas ouvert :\n\n1. Quitte EduBF\n2. Ouvre Chrome toi-même\n3. Tape : fasoecoleprobf.github.io/EduBF-/\n4. Dans Chrome, touche Imprimer\n\nDans Chrome, Imprimer MARCHE. Dans l’application, Imprimer est bloqué par le téléphone, ce n’est pas EduBF.');
-    }, 1500);
-  }
-  window.EduBF_ouvrirChromeForce = ouvrirChromeForce;
-  // Remplacer TOUS les boutons Imprimer / Partager par le vrai chemin Chrome
-  document.addEventListener('click', function(e){
-    var b = e.target.closest('button, a');
-    if(!b) return;
-    var t = (b.textContent||'').toLowerCase();
-    var isPrint = t.indexOf('imprimer')>=0 || t.indexOf('partager')>=0 || t.indexOf('pdf')>=0;
-    if(isPrint){
-      // Si on est dans Chrome, on laisse le vrai print de Chrome marcher
-      var isChrome = /Chrome/.test(navigator.userAgent) && !/AppsGeyser|wv/.test(navigator.userAgent);
-      // En fait dans l'app AppsGeyser, userAgent contient wv, donc on force Chrome
-      if(navigator.userAgent.indexOf('wv')>=0 || window.location.href.indexOf('appsgeyser')>=0 || !window.chrome){
-        e.preventDefault(); e.stopPropagation();
-        // Nommer le document
-        try{ document.title = 'EduBF_Cartes_Scolaires_CM2_' + new Date().toISOString().slice(0,10); }catch(err){}
-        ouvrirChromeForce();
-        return false;
-      }
-    }
-  }, true);
-  // Bouton flottant V64 toujours visible, même sur Cartes
-  setTimeout(function(){
-    if(document.getElementById('edubf-v64-bar')) return;
-    var bar = document.createElement('div');
-    bar.id='edubf-v64-bar';
-    bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:100000;background:#14532d;padding:10px;display:flex;gap:8px;justify-content:center;';
-    bar.innerHTML = '<button onclick="EduBF_ouvrirChromeForce()" style="flex:1;background:#f59e0b;color:#000;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px">🌐 OUVRIR DANS CHROME POUR IMPRIMER</button>';
-    document.body.appendChild(bar);
-    // Petit message d'explication
-    var msg = document.createElement('div');
-    msg.style.cssText='position:fixed;top:0;left:0;right:0;z-index:100000;background:#fef3c7;color:#000;padding:8px;text-align:center;font-size:13px;font-weight:700;';
-    msg.textContent = '⚠️ Dans l’application, Imprimer est bloqué. Touche le bouton orange en bas : Ouvrir dans Chrome pour Imprimer';
-    document.body.appendChild(msg);
-  }, 500);
-})();
-</script>
-
-<!-- PATCH V65 : Message qui ne reste plus + Toast qui disparait + Pub qui ne bloque plus -->
-<style>
-  /* Le contenu ne doit plus être caché derrière les boutons du bas */
-  body{ padding-bottom: 130px !important; }
-  /* Tous les petits messages "élève enregistré" doivent partir vite */
-  .toast, .notification, .alert-success, [id*="toast"], [class*="toast"]{
-    animation: edubf-toast-out 0.5s ease 2s forwards !important;
-  }
-  @keyframes edubf-toast-out{ to{ opacity:0; visibility:hidden; transform:translateY(20px); } }
-</style>
-<script>
-(function(){
-  // 1. Le message jaune en haut : on met une croix X pour le fermer, et il part tout seul après 5 secondes
-  function fixerBandeau(){
     document.querySelectorAll('div').forEach(function(d){
-      var t = (d.textContent||'');
-      if(t.indexOf('Dans l’application, Imprimer est bloqué')>=0 && !d.dataset.edubfFix){
-        d.dataset.edubfFix='1';
-        d.style.cssText += ';position:relative;';
-        var x = document.createElement('button');
-        x.textContent='✕ Fermer';
-        x.style.cssText='background:#000;color:#fff;border:0;padding:6px 10px;border-radius:20px;margin-left:8px;font-weight:700;';
-        x.onclick=function(){ d.remove(); };
-        d.appendChild(x);
-        setTimeout(function(){ try{d.remove();}catch(e){} }, 5000);
+      var t=(d.textContent||'');
+      if(t.indexOf('Dans l’application, Imprimer est bloqué')>=0 && d.children.length<3){ d.remove(); }
+    });
+  }
+  setInterval(nettoyer, 1000);
+  // 2. Toast "élève enregistré" part après 2 secondes
+  setInterval(function(){
+    document.querySelectorAll('div,span,p').forEach(function(el){
+      var t=(el.textContent||'').trim().toLowerCase();
+      if(t.indexOf('élève enregistré')>=0 && el.children.length===0 && !el.dataset.f66){
+        el.dataset.f66='1'; setTimeout(function(){ el.style.display='none'; }, 2000);
       }
     });
-  }
-  setInterval(fixerBandeau, 1000);
-
-  // 2. Le message "élève enregistré" qui reste en bas : on le fait disparaître après 2 secondes
-  function fixerToast(){
-    document.querySelectorAll('div, span, p').forEach(function(el){
-      var t = (el.textContent||'').trim().toLowerCase();
-      if((t.indexOf('élève enregistré')>=0 || t.indexOf('eleve enregistre')>=0 || t.indexOf('enregistré avec succès')>=0) && el.children.length===0){
-        if(!el.dataset.edubfToast){
-          el.dataset.edubfToast='1';
-          el.style.cssText += ';position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:99999;background:#16a34a;color:#fff;padding:10px 16px;border-radius:20px;box-shadow:0 2px 10px rgba(0,0,0,.3);';
-          setTimeout(function(){ try{ el.remove(); }catch(e){ el.style.display='none'; } }, 2000);
-        }
-      }
-    });
-    // Aussi : tous les toasts génériques qui restent collés en bas
-    document.querySelectorAll('.toast, .notification').forEach(function(el){
-      if(!el.dataset.edubfToast2){ el.dataset.edubfToast2='1'; setTimeout(function(){ el.style.display='none'; }, 2000); }
-    });
-  }
-  setInterval(fixerToast, 800);
-
-  // 3. Le bouton orange en bas ne doit plus être collé et bloquer : il devient un bouton normal qui suit la page, avec une croix
-  function fixerBoutonOrange(){
-    var bar = document.getElementById('edubf-v64-bar');
-    if(bar && !bar.dataset.edubfFix2){
-      bar.dataset.edubfFix2='1';
-      bar.style.cssText='position:relative;margin:12px;padding:0;background:transparent;z-index:10;';
-      var close = document.createElement('button');
-      close.textContent='✕ Cacher ce bouton';
-      close.style.cssText='background:#fff;border:1px solid #999;padding:6px 10px;border-radius:20px;font-size:12px;margin-top:6px;';
-      close.onclick=function(){ bar.style.display='none'; };
-      bar.appendChild(close);
-    }
-    var aide = document.getElementById('edubf-aide-fichier');
-    if(aide){ aide.style.position='relative'; aide.style.bottom='auto'; aide.style.right='auto'; aide.style.margin='10px'; }
-  }
-  setInterval(fixerBoutonOrange, 1000);
-
-  // 4. Cacher le code qui apparaît en bas de page (le texte avec OP(html... fp2-ecole)
-  function cacherCode(){
-    document.querySelectorAll('div, pre, code, p, span').forEach(function(el){
-      var t = el.textContent||'';
-      if(t.indexOf('OP(html')>=0 || t.indexOf('fp2-ecole')>=0){
-        if(el.children.length===0) el.style.display='none';
-      }
-    });
-  }
-  setInterval(cacherCode, 1000);
-
-  // 5. Quand on touche Imprimer, ne plus laisser le message d'erreur rester : on ouvre Chrome tout de suite
+  }, 800);
+  // 3. Un seul bouton Chrome, qui s'ouvre VRAIMENT
+  window.EduBF_imprimerChrome = function(){
+    var url='https://fasoecoleprobf.github.io/EduBF-/';
+    try{ document.title='EduBF_Document_'+new Date().toISOString().slice(0,10); }catch(e){}
+    // Force Chrome depuis AppsGeyser
+    window.location.href='intent://fasoecoleprobf.github.io/EduBF-/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end';
+    setTimeout(function(){ alert('Dans Chrome :\n1. Touche Imprimer\n2. Choisis Enregistrer en PDF\n3. Retrouve le fichier dans Chrome > 3 points > Téléchargements'); }, 1500);
+  };
+  // 4. Si on touche un bouton Imprimer dans l'app, on va dans Chrome au lieu de rester bloqué
   document.addEventListener('click', function(e){
-    var b = e.target.closest('button, a');
-    if(!b) return;
-    var t = (b.textContent||'').toLowerCase();
-    if(t.indexOf('imprimer')>=0){
-      // On enlève tous les messages d'erreur visibles
-      setTimeout(function(){
-        document.querySelectorAll('div').forEach(function(d){
-          var dt = (d.textContent||'').toLowerCase();
-          if(dt.indexOf('erreur')>=0 && dt.length<300 && d.children.length===0){ d.style.display='none'; }
-        });
-      }, 500);
+    var b=e.target.closest('button,a'); if(!b) return;
+    var t=(b.textContent||'').toLowerCase();
+    if(t.indexOf('imprimer')>=0 && navigator.userAgent.indexOf('wv')>=0){
+      e.preventDefault(); e.stopPropagation(); window.EduBF_imprimerChrome();
     }
   }, true);
+  // 5. Cacher le code qui fuit en bas
+  setInterval(function(){
+    document.querySelectorAll('div,pre,code,p,span').forEach(function(el){
+      var t=el.textContent||'';
+      if((t.indexOf('OP(html')>=0 || t.indexOf('fp2-ecole')>=0) && el.children.length===0) el.style.display='none';
+    });
+  }, 1000);
 })();
 </script>
 </body>
-
-
 </html>';
   OP(html,nomFichier);
 }
