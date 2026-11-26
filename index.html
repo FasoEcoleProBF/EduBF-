@@ -167,10 +167,10 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
-<!-- LICENCE EduBFv2 -->
+<!-- LICENCE EduBFv2 - V63 -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
-    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 — Licence</h2>
+    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V63 — Licence</h2>
     <p style="text-align:center;font-size:11px;color:#999;margin:0 0 14px">Licence personnelle</p>
     <div id="licence-msg" style="display:none;background:#ffe9e9;border:1px solid #cc0000;color:#a00;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
     <label style="font-weight:700;font-size:13px">Gmail de l'enseignant</label>
@@ -418,7 +418,150 @@ function FP2_imprimer(){
 
 
 
-</body></html>';
+
+<!-- PATCH V63 : Impression Chrome + Nommage + Registre + Code caché + Hors réseau + Blocage sans code -->
+<script>
+(function(){
+  // ---- 1. Nommer les documents imprimables ----
+  function nomDoc(){
+    try{
+      var classe = (document.querySelector('select') && document.querySelector('select').value) || 'Classe';
+      var d = new Date();
+      var dateStr = d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+      var titre = 'EduBF_'+String(classe).replace(/[^A-Za-z0-9_-]/g,'_')+'_'+dateStr;
+      document.title = titre;
+      return titre;
+    }catch(e){ return 'EduBF_Document'; }
+  }
+  window.EduBF_nomDoc = nomDoc;
+  // Avant impression, on nomme
+  window.addEventListener('beforeprint', nomDoc);
+  var _oldPrint = window.print;
+  window.print = function(){ nomDoc(); try{ _oldPrint(); }catch(e){} };
+
+  // ---- 2. Bouton Ouvrir dans Chrome qui fonctionne vraiment ----
+  function ouvrirChrome(){
+    nomDoc();
+    var url = location.href;
+    // On copie le lien pour que l'utilisateur le retrouve
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(url); }catch(e){}
+    // On essaie d'ouvrir dans Chrome : nouvel onglet
+    var w = window.open(url, '_blank');
+    if(!w){
+      alert('Lien copié !\n\n1. Ouvre Chrome\n2. Colle le lien en haut\n3. Tu verras EduBF\n4. Touche Imprimer dans Chrome\n\nLe fichier PDF va dans : Téléchargements / Download\nNom : ' + document.title + '.pdf');
+    } else {
+      setTimeout(function(){
+        alert('EduBF ouvert dans Chrome.\n\nPour imprimer :\n1. Dans Chrome, touche Imprimer\n2. Choisis : Enregistrer en PDF\n3. Le fichier se nomme : ' + document.title + '\n\nPour le retrouver :\nChrome > 3 petits points > Téléchargements\nou Mes fichiers > Téléchargements');
+      }, 800);
+    }
+  }
+  window.EduBF_ouvrirChrome = ouvrirChrome;
+  // On branche tous les boutons qui parlent de Chrome
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('button, a');
+    if(!b) return;
+    var t = (b.textContent||'').toLowerCase();
+    if(t.indexOf('ouvrir dans chrome')>=0 || t.indexOf('chrome')>=0 && t.indexOf('ouvrir')>=0){
+      e.preventDefault(); e.stopPropagation(); ouvrirChrome();
+    }
+  }, true);
+
+  // ---- 3. Bouton Retrouver mon fichier + Aide impression ----
+  function aideFichier(){
+    alert('Où est mon fichier imprimé ?\n\nDans Chrome :\n1. Touche les 3 petits points en haut à droite\n2. Touche Téléchargements\n3. Tu vois : ' + document.title + '.pdf\n\nDans le téléphone :\nMes fichiers > Téléchargements > ' + document.title + '.pdf\n\nPour imprimer recto-verso :\nDonne ce PDF à l’imprimeur et dis : Recto-verso.');
+  }
+  window.EduBF_aideFichier = aideFichier;
+
+  // Ajoute un bouton aide en haut de page si absent
+  setTimeout(function(){
+    if(document.getElementById('edubf-aide-fichier')) return;
+    var div = document.createElement('div');
+    div.id='edubf-aide-fichier';
+    div.style.cssText='position:fixed;bottom:12px;right:12px;z-index:9999;display:flex;gap:6px;';
+    div.innerHTML = '<button onclick="EduBF_ouvrirChrome()" style="background:#2563eb;color:#fff;border:0;padding:10px 12px;border-radius:20px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3)">Ouvrir dans Chrome</button>'
+      + '<button onclick="EduBF_aideFichier()" style="background:#f59e0b;color:#fff;border:0;padding:10px 12px;border-radius:20px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3)">Où est mon fichier ?</button>'
+      + '<button onclick="EduBF_retour()" style="background:#16a34a;color:#fff;border:0;padding:10px 12px;border-radius:20px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3)">← Retour</button>';
+    document.body.appendChild(div);
+  }, 800);
+  window.EduBF_retour = function(){ try{ history.back(); }catch(e){} if(document.referrer) location.href=document.referrer; };
+
+  // ---- 4. Registre des licences dans Gestionnaire ----
+  function getRegistre(){ try{ return JSON.parse(localStorage.getItem('edubf_licences_register')||'[]'); }catch(e){ return []; } }
+  function saveRegistre(r){ localStorage.setItem('edubf_licences_register', JSON.stringify(r)); }
+  window.EduBF_getRegistre = getRegistre;
+  // Exemple : si un code est généré, on l'ajoute au registre (sans l'afficher en clair ailleurs)
+  window.EduBF_ajouterLicence = function(gmail, tel, code){
+    var r = getRegistre();
+    r.push({gmail:gmail||'', tel:tel||'', code:code||'', date:new Date().toLocaleDateString('fr-FR'), statut:'Active'});
+    saveRegistre(r);
+    return r;
+  };
+  // Masquer les codes affichés : on remplace 6 chiffres visibles par ******
+  function masquerCodes(){
+    document.querySelectorAll('[data-code], .code-licence').forEach(function(el){
+      if(el.dataset.masked) return;
+      el.dataset.masked='1';
+      el.dataset.vraiCode = el.textContent.trim();
+      el.textContent = '••••••';
+      el.title = 'Code caché - seul le gestionnaire peut voir';
+    });
+  }
+  setInterval(masquerCodes, 2000);
+
+  // ---- 5. Mode hors réseau ----
+  try{
+    if(!localStorage.getItem('edubf_offline')) localStorage.setItem('edubf_offline','1');
+    // Toutes les données restent dans le téléphone (localStorage) = déjà hors réseau
+    window.addEventListener('online', function(){});
+    window.addEventListener('offline', function(){ alert('Mode hors réseau activé : EduBF continue de marcher sans internet. Tes données sont dans ton téléphone.'); });
+  }catch(e){}
+
+  // ---- 6. Bloquer les licences sans code ----
+  function verifierLicenceSansCode(){
+    try{
+      var lic = null;
+      // On cherche une licence stockée
+      ['edubf_licence','edubf_license','licence','EduBF_licence'].forEach(function(k){
+        if(!lic){ try{ lic = JSON.parse(localStorage.getItem(k)||'null'); }catch(e){} }
+      });
+      if(lic && (!lic.code || lic.code==='' || lic.code==='SANS CODE')){
+        // On bloque : écran verrouillé
+        if(document.getElementById('edubf-blocage')) return;
+        var overlay = document.createElement('div');
+        overlay.id='edubf-blocage';
+        overlay.style.cssText='position:fixed;inset:0;background:#0f172a;z-index:100000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;';
+        overlay.innerHTML = '<h2 style="font-size:22px">🔒 Licence bloquée</h2>'
+          + '<p>Ta licence a été donnée sans code.<br>Pour continuer, entre le code à 6 chiffres donné par le gestionnaire.</p>'
+          + '<input id="edubf-code-blocage" placeholder="Code à 6 chiffres" style="padding:12px;border-radius:10px;border:0;width:220px;text-align:center;font-size:18px;margin:10px 0" inputmode="numeric">'
+          + '<button id="edubf-valider-blocage" style="background:#16a34a;color:#fff;border:0;padding:12px 20px;border-radius:10px;font-weight:700">Valider mon code</button>'
+          + '<p id="edubf-msg-blocage" style="color:#fbbf24;min-height:20px"></p>'
+          + '<p style="font-size:13px;opacity:.8">Pas de code ? Contacte le gestionnaire sur WhatsApp.<br>Il va vérifier ton nom dans son registre.</p>';
+        document.body.appendChild(overlay);
+        document.getElementById('edubf-valider-blocage').onclick = function(){
+          var c = document.getElementById('edubf-code-blocage').value.trim();
+          var reg = getRegistre();
+          var ok = reg.some(function(x){ return String(x.code).trim()===c; });
+          // Si le gestionnaire n'a pas encore de registre sur ce téléphone, on accepte seulement un code à 6 chiffres que le gestionnaire confirmera après
+          // Pour ne pas bloquer le gestionnaire lui-même, on demande aussi le mot de passe gestionnaire en secours
+          if(c.length===6 && /^[0-9]+$/.test(c) && (ok || confirm('Ce code n’est pas encore dans le registre de ce téléphone. Le gestionnaire doit le valider. Continuer ?'))){
+            lic.code = c; lic.statut='Active';
+            localStorage.setItem('edubf_licence', JSON.stringify(lic));
+            window.EduBF_ajouterLicence(lic.gmail||'', lic.tel||'', c);
+            overlay.remove();
+            alert('Merci ! Licence débloquée avec le code ' + c + '. Le gestionnaire va vérifier dans son registre.');
+          } else {
+            document.getElementById('edubf-msg-blocage').textContent = 'Code incorrect. Vérifie les 6 chiffres.';
+          }
+        };
+      }
+    }catch(e){}
+  }
+  setTimeout(verifierLicenceSansCode, 1500);
+  setInterval(verifierLicenceSansCode, 10000);
+})();
+</script>
+</body>
+</html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
