@@ -167,10 +167,10 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
-<!-- LICENCE EduBFv2 - V63 -->
+<!-- LICENCE EduBFv2 - V64 -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
-    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V63 — Licence</h2>
+    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V64 — Licence</h2>
     <p style="text-align:center;font-size:11px;color:#999;margin:0 0 14px">Licence personnelle</p>
     <div id="licence-msg" style="display:none;background:#ffe9e9;border:1px solid #cc0000;color:#a00;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
     <label style="font-weight:700;font-size:13px">Gmail de l'enseignant</label>
@@ -560,7 +560,63 @@ function FP2_imprimer(){
   setInterval(verifierLicenceSansCode, 10000);
 })();
 </script>
+
+<!-- PATCH V64 : Force Chrome via intent:// car window.print() est bloqué dans AppsGeyser -->
+<script>
+(function(){
+  function urlEduBF(){ return 'https://fasoecoleprobf.github.io/EduBF-/'; }
+  function ouvrirChromeForce(){
+    var titre = document.title || 'EduBF_Cartes_CM2';
+    // 1. On sauvegarde la page actuelle pour retrouver après
+    try{ localStorage.setItem('edubf_dernier_doc', titre); }catch(e){}
+    // 2. Lien qui force Chrome à s'ouvrir même depuis l'application AppsGeyser
+    var intentUrl = 'intent://fasoecoleprobf.github.io/EduBF-/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(urlEduBF()) + ';end';
+    // On essaie intent d'abord
+    window.location.href = intentUrl;
+    // Secours après 1.5s si intent bloqué : ouvrir nouvel onglet
+    setTimeout(function(){
+      try{ window.open(urlEduBF(), '_blank'); }catch(e){}
+      alert('Si Chrome ne s’est pas ouvert :\n\n1. Quitte EduBF\n2. Ouvre Chrome toi-même\n3. Tape : fasoecoleprobf.github.io/EduBF-/\n4. Dans Chrome, touche Imprimer\n\nDans Chrome, Imprimer MARCHE. Dans l’application, Imprimer est bloqué par le téléphone, ce n’est pas EduBF.');
+    }, 1500);
+  }
+  window.EduBF_ouvrirChromeForce = ouvrirChromeForce;
+  // Remplacer TOUS les boutons Imprimer / Partager par le vrai chemin Chrome
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('button, a');
+    if(!b) return;
+    var t = (b.textContent||'').toLowerCase();
+    var isPrint = t.indexOf('imprimer')>=0 || t.indexOf('partager')>=0 || t.indexOf('pdf')>=0;
+    if(isPrint){
+      // Si on est dans Chrome, on laisse le vrai print de Chrome marcher
+      var isChrome = /Chrome/.test(navigator.userAgent) && !/AppsGeyser|wv/.test(navigator.userAgent);
+      // En fait dans l'app AppsGeyser, userAgent contient wv, donc on force Chrome
+      if(navigator.userAgent.indexOf('wv')>=0 || window.location.href.indexOf('appsgeyser')>=0 || !window.chrome){
+        e.preventDefault(); e.stopPropagation();
+        // Nommer le document
+        try{ document.title = 'EduBF_Cartes_Scolaires_CM2_' + new Date().toISOString().slice(0,10); }catch(err){}
+        ouvrirChromeForce();
+        return false;
+      }
+    }
+  }, true);
+  // Bouton flottant V64 toujours visible, même sur Cartes
+  setTimeout(function(){
+    if(document.getElementById('edubf-v64-bar')) return;
+    var bar = document.createElement('div');
+    bar.id='edubf-v64-bar';
+    bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:100000;background:#14532d;padding:10px;display:flex;gap:8px;justify-content:center;';
+    bar.innerHTML = '<button onclick="EduBF_ouvrirChromeForce()" style="flex:1;background:#f59e0b;color:#000;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px">🌐 OUVRIR DANS CHROME POUR IMPRIMER</button>';
+    document.body.appendChild(bar);
+    // Petit message d'explication
+    var msg = document.createElement('div');
+    msg.style.cssText='position:fixed;top:0;left:0;right:0;z-index:100000;background:#fef3c7;color:#000;padding:8px;text-align:center;font-size:13px;font-weight:700;';
+    msg.textContent = '⚠️ Dans l’application, Imprimer est bloqué. Touche le bouton orange en bas : Ouvrir dans Chrome pour Imprimer';
+    document.body.appendChild(msg);
+  }, 500);
+})();
+</script>
 </body>
+
 </html>';
   OP(html,nomFichier);
 }
