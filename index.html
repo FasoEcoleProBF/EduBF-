@@ -167,11 +167,11 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
-<!-- LICENCE EduBFv2 - V66 -->
+<!-- LICENCE EduBFv2 : 1 compte = 1 téléphone, validation gestionnaire -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
-    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V66 — Licence</h2>
-    <p style="text-align:center;font-size:11px;color:#999;margin:0 0 14px">Licence personnelle</p>
+    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 — Licence</h2>
+    <p style="text-align:center;font-size:13px;color:#555;margin:0 0 14px">1 compte = 1 téléphone. Seul le gestionnaire valide.</p>
     <div id="licence-msg" style="display:none;background:#ffe9e9;border:1px solid #cc0000;color:#a00;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
     <label style="font-weight:700;font-size:13px">Gmail de l'enseignant</label>
     <input id="lic-gmail"  type="email" placeholder="exemple@gmail.com" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
@@ -179,11 +179,11 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
     <input id="lic-mdp" type="password" placeholder="Au moins 6 caractères" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
     <label style="font-weight:700;font-size:13px">Code du gestionnaire</label>
     <input id="lic-code" type="text" placeholder="Code donné par le gestionnaire" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
-    <p style="font-size:12px;color:#666;margin:0 0 12px">Entre tes informations pour ouvrir EduBF.</p>
+    <p style="font-size:12px;color:#666;margin:0 0 12px">Seule une licence creee par le gestionnaire pour TON Gmail et TON telephone ouvre EduBF.</p>
     <button onclick="LIC_valider()" style="width:100%;background:#0a6b2e;color:#fff;border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer">✅ Valider ma licence</button>
     <p id="lic-info" style="font-size:12px;color:#666;text-align:center;margin-top:12px"></p>
      <div style="display:flex;gap:8px;margin-top:8px"><button type="button" onclick="LIC_copierTEL()" style="flex:1;background:#444;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:800">📋 Copier mon code TEL</button><button type="button" onclick="LIC_whatsappGestionnaire()" style="flex:1;background:#25D366;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:800">💬 Envoyer sur WhatsApp</button></div>
-     <p style="font-size:12px;color:#666;text-align:center;margin-top:6px">Touche WhatsApp pour envoyer tes informations au gestionnaire.</p>
+     <p style="font-size:12px;color:#666;text-align:center;margin-top:6px">À distance : touche WhatsApp, envoie ton Gmail + ton code TEL au gestionnaire. Il te renvoie ton code à 6 chiffres.</p>
   </div>
 </div>
 <script> (function(){
@@ -413,7 +413,11 @@ function FP2_imprimer(){
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
   var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
-  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'<\/body><\/html>';
+  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'
+
+
+
+</body></html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
@@ -567,7 +571,7 @@ function AR_afficherFeries(){ var div=document.getElementById('ar-ferie-liste');
 function AR_pointage_key(cid, jour){ return 'edubf_arret_jour_'+cid+'_'+jour; }
 function AR_pointage_afficher(){ var cid=document.getElementById('ar-classeSel').value; var jour=document.getElementById('ar-jour').value; var out=document.getElementById('ar-pointage-out'); if(!cid){ out.innerHTML='<p style="color:#cc0000;font-weight:800">Choisis d\u0027abord ta classe.</p>'; return; } if(!jour){ out.innerHTML='<p style="color:#cc0000;font-weight:800">Choisis d\u0027abord le jour à pointer.</p>'; return; } var els=(window.EL||[]).filter(function(e){return e.cid===cid}).sort(function(a,b){return (a.nom||'').localeCompare(b.nom||'')}); if(!els.length){ out.innerHTML='<p style="color:#cc0000;font-weight:800">Aucun élève dans cette classe.</p>'; return; } var saved={}; try{ saved=JSON.parse(localStorage.getItem(AR_pointage_key(cid,jour))||'{}'); }catch(e){} var d=new Date(jour+'T12:00:00'); var j=d.getDay(); var soirOK=(j===1||j===2||j===4||j===5); out.innerHTML='<p style="font-size:.85rem"><b>'+jour+'</b> — '+(soirOK?'Matin + Soir (Lun / Mar / Jeu / Ven)':'Matin seulement (Mercredi) — le Soir est fermé ce jour-là.')+'</p><table class="nt"><thead><tr><th>Élève</th><th>Matin absent ?</th><th>Soir absent ?</th></tr></thead><tbody>'+els.map(function(e){ var s=saved[e.id]||{}; var isF=(e.sexe||'').toLowerCase().indexOf('f')===0; return '<tr><td style="'+(isF?'color:#cc0000;font-weight:800':'')+'">'+e.nom+' '+e.pre+'</td><td style="text-align:center"><input type="checkbox" id="ar_pt_matin_'+e.id+'" '+(s.matin?'checked':'')+' style="width:22px;height:22px"/></td><td style="text-align:center"><input type="checkbox" id="ar_pt_soir_'+e.id+'" '+(s.soir?'checked':'')+(soirOK?'':' disabled')+' style="width:22px;height:22px"/></td></tr>'; }).join('')+'</tbody></table>'; }
 function AR_pointage_enregistrer(){ var cid=document.getElementById('ar-classeSel').value; var jour=document.getElementById('ar-jour').value; if(!cid||!jour){ alert('Choisis la classe et le jour d\u0027abord'); return; } var els=(window.EL||[]).filter(function(e){return e.cid===cid}); var data={}; els.forEach(function(e){ var m=document.getElementById('ar_pt_matin_'+e.id); var s=document.getElementById('ar_pt_soir_'+e.id); data[e.id]={matin:!!(m&&m.checked), soir:!!(s&&s.checked)}; }); try{ localStorage.setItem(AR_pointage_key(cid,jour), JSON.stringify(data)); }catch(e){} var ym=jour.slice(0,7); var moisEl=document.getElementById('ar-mois'); if(moisEl) moisEl.value=ym; var tot={}; els.forEach(function(e){ tot[e.id]={demi:0}; }); try{ for(var dd=1; dd<=31; dd++){ var jj=ym+'-'+('0'+dd).slice(-2); var dj={}; try{ dj=JSON.parse(localStorage.getItem(AR_pointage_key(cid,jj))||'{}'); }catch(e){} Object.keys(dj).forEach(function(eid){ if(!tot[eid]) tot[eid]={demi:0}; if(dj[eid].matin) tot[eid].demi+=1; if(dj[eid].soir) tot[eid].demi+=1; }); } }catch(e2){} try{ S.set('abs_mois_'+cid+'_'+ym, tot); }catch(e3){} toast('✅ Pointage du '+jour+' enregistré', '#1a5c2a'); AR_load(); }
-function AR_imprimer(){ var out=document.getElementById('ar-out'); if(!out||!out.innerHTML.trim()){ alert('Affiche d\u0027abord l\u0027arrêt du mois'); return; } var titre='Arret_Registre_'+(document.getElementById('ar-mois').value||'mois'); var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:12px}h2{color:#0a6b2e}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:5px}th{background:#cc0000;color:#fff}'; OP('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+titre+'</title><style>'+css+'</style></head><body><h2>📕 Arrêt de Registre — '+(document.getElementById('ar-mois').value||'')+'</h2>'+out.innerHTML+'<\/body><\/html>', titre); }
+function AR_imprimer(){ var out=document.getElementById('ar-out'); if(!out||!out.innerHTML.trim()){ alert('Affiche d\u0027abord l\u0027arrêt du mois'); return; } var titre='Arret_Registre_'+(document.getElementById('ar-mois').value||'mois'); var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:12px}h2{color:#0a6b2e}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:5px}th{background:#cc0000;color:#fff}'; OP('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+titre+'</title><style>'+css+'</style></head><body><h2>📕 Arrêt de Registre — '+(document.getElementById('ar-mois').value||'')+'</h2>'+out.innerHTML+'</bo'+'dy></ht'+'ml>', titre); }
 function AR_importer(){ try{ AR_fillClasses(); }catch(e){} var cid=document.getElementById('ar-classeSel').value; var out=document.getElementById('ar-out'); if(!cid){ out.innerHTML='<p style="color:#cc0000;font-weight:800">⚠️ Choisis d\'abord ta classe dans le menu CLASSE ci-dessus. Si le menu est vide, c\'est qu\'il n\'y a aucune classe dans ce navigateur. Va dans ton appli installée (où sont tes élèves), ou touche « Aller dans Élèves » pour créer ta classe et tes élèves.</p>'; return; } var n=(window.EL||[]).filter(function(e){return e.cid===cid}).length; if(!n){ out.innerHTML='<p style="color:#cc0000;font-weight:800">⚠️ Cette classe n\'a aucun élève. Va dans Élèves, choisis cette classe et ajoute tes élèves, puis reviens ici et retouche Importer.</p>'; return; } AR_load(); }
 function GBACK(){ try{ G('accueil'); }catch(e){ window.location.hash='#accueil'; } window.scrollTo(0,0); }
 function AR_load(){ try{ AR_fillClasses(); }catch(e){}  var cid=document.getElementById('ar-classeSel').value; var out=document.getElementById('ar-out'); var h=AR_header(); var ecoleEl=document.getElementById('ar-ecole'), cebEl=document.getElementById('ar-ceb'), anEl=document.getElementById('ar-annee'); if(ecoleEl && !ecoleEl.value) ecoleEl.value=h.ecole||((window.PA&&PA.nom)||''); if(cebEl && !cebEl.value) cebEl.value=h.ceb||((window.IDENT&&IDENT.ceb)||''); if(anEl && !anEl.value) anEl.value=h.annee||((window.PA&&PA.annee)||''); var moisEl=document.getElementById('ar-mois'); if(moisEl && !moisEl.value){ var now=new Date(); moisEl.value=now.getFullYear()+'-'+('0'+(now.getMonth()+1)).slice(-2); } var ym=AR_moisKey(); if(!cid){ out.innerHTML='<p style="color:#cc0000;font-weight:800">⚠️ Choisis d\'abord ta classe dans le menu CLASSE. Si le menu est vide, il n\'y a aucune classe dans ce navigateur. Ouvre ton appli installée (où sont tes élèves), ou crée ta classe dans Élèves.</p>'; return; } var ferie=parseFloat(document.getElementById('ar-ferie').value||0)||0; var demiTotal=AR_demiJoursMois(ym); var demiPossible=Math.max(0, demiTotal-ferie); try{ AR_afficherFeries(); var infoEl=document.getElementById('ar-demi-info'); if(infoEl) infoEl.textContent='Demi-journ\u00e9es du mois : '+demiTotal+'  |  F\u00e9ri\u00e9s : '+ferie+'  |  Demi-journ\u00e9es possibles : '+demiPossible; }catch(e){} var els=(window.EL||[]).filter(function(e){return e.cid===cid}).sort(function(a,b){return (a.nom||'').localeCompare(b.nom||'')}); var saved={}; try{ saved=S.get('abs_mois_'+cid+'_'+ym,{})||{}; }catch(e){} if(!els.length){ out.innerHTML='<p style="color:#cc0000;font-weight:800">⚠️ Cette classe n\'a aucun élève dans ce navigateur. Va dans Élèves, ajoute tes élèves à cette classe, puis reviens ici et retouche Importer la liste.</p>'; document.getElementById('ar-sign').innerHTML=''; return; } function stats(list){ var poss=list.length*demiPossible; var abs=0; list.forEach(function(e){ abs+=(saved[e.id]&&saved[e.id].demi)||0; }); var eff=Math.max(0,poss-abs); var txAbs=poss?abs/poss*100:0; var txPres=poss?eff/poss*100:0; var moins=0, plus=0; list.forEach(function(e){ var d=(saved[e.id]&&saved[e.id].demi)||0; if(d<=3) moins++; if(d>3) plus++; }); return {n:list.length, poss:poss, abs:abs, eff:eff, txAbs:txAbs, txPres:txPres, moins:moins, plus:plus}; } var garcons=els.filter(function(e){return (e.sexe||'').toLowerCase().indexOf('f')!==0}); var filles=els.filter(function(e){return (e.sexe||'').toLowerCase().indexOf('f')===0}); var sG=stats(garcons), sF=stats(filles), sT=stats(els); var moisTxt=''; try{ var pp=ym.split('-'); var nomsMois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']; moisTxt=nomsMois[parseInt(pp[1])-1]+' '+pp[0]; }catch(e2){ moisTxt=ym; } var rows=els.map(function(e,i){ var isF=(e.sexe||'').toLowerCase().indexOf('f')===0; var style=isF?'color:#cc0000;font-weight:800':''; var d=(saved[e.id]&&saved[e.id].demi)||0; var eff=Math.max(0,demiPossible-d); return '<tr><td>'+(i+1)+'</td><td style="'+style+'">'+(e.nom||'')+' '+(e.pre||'')+'</td><td style="'+style+'">'+(isF?'Fille':'Garçon')+'</td><td>'+demiPossible+'</td><td><input class="ni" type="number" min="0" step="0.5" id="ar_abs_'+e.id+'" value="'+d+'"/></td><td>'+eff+'</td><td>'+(demiPossible?((d/demiPossible*100).toFixed(1)+'%'):'—')+'</td></tr>'; }).join(''); function fmt(n){ return Math.round(n*10)/10; } out.innerHTML='<div style="text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:8px;margin-bottom:10px"><div style="font-weight:800;color:#0a6b2e;font-size:1.05em">'+(document.getElementById('ar-ecole').value||'ÉCOLE')+'</div><div>CEB : '+(document.getElementById('ar-ceb').value||'—')+' — Année scolaire : '+(document.getElementById('ar-annee').value||'—')+'</div><div style="font-weight:800;margin-top:4px">ARRÊT DE REGISTRE — MOIS DE '+moisTxt.toUpperCase()+'</div><div>Classe : '+((CL.find(function(c){return c.id===cid})||{}).nom||'—')+'</div></div><p><b>Demi-journées de classe du mois :</b> '+demiTotal+' — Fériées / chômées exclues : '+ferie+' — <b>Demi-journées possibles par élève : '+demiPossible+'</b></p><div class="ntw"><table class="nt"><thead><tr><th>N°</th><th>Nom & Prénom</th><th>Sexe</th><th>Demi-journées possibles</th><th>Demi-journées d\'absence</th><th>Présence effective</th><th>Taux d\'absence</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">Aucun élève dans cette classe</td></tr>')+'</tbody></table></div><h3 style="margin-top:16px">📊 Tableau récapitulatif — Garçons / Filles / Total</h3><div class="ntw"><table class="nt"><thead><tr><th>Rubrique</th><th>Garçons</th><th>Filles</th><th>Total</th></tr></thead><tbody><tr><td>Nombre de demi-journées</td><td>'+demiPossible+'</td><td>'+demiPossible+'</td><td>'+demiPossible+'</td></tr><tr><td>Nombre de présence possible</td><td>'+sG.poss+'</td><td>'+sF.poss+'</td><td>'+sT.poss+'</td></tr><tr><td>Nombre d\'absents (demi-journées d\'absence)</td><td>'+fmt(sG.abs)+'</td><td>'+fmt(sF.abs)+'</td><td>'+fmt(sT.abs)+'</td></tr><tr><td>Nombre de présence effective</td><td>'+fmt(sG.eff)+'</td><td>'+fmt(sF.eff)+'</td><td>'+fmt(sT.eff)+'</td></tr><tr><td>Taux d\'absence du mois</td><td>'+sG.txAbs.toFixed(1)+'%</td><td>'+sF.txAbs.toFixed(1)+'%</td><td>'+sT.txAbs.toFixed(1)+'%</td></tr><tr><td>Taux de présence du mois</td><td>'+sG.txPres.toFixed(1)+'%</td><td>'+sF.txPres.toFixed(1)+'%</td><td>'+sT.txPres.toFixed(1)+'%</td></tr><tr><td>Nombre d\'élèves ayant moins de 3 absences (≤ 3 demi-journées)</td><td>'+sG.moins+'</td><td>'+sF.moins+'</td><td>'+sT.moins+'</td></tr><tr><td>Nombre d\'élèves ayant plus de 3 absences (4 demi-journées et +)</td><td>'+sG.plus+'</td><td>'+sF.plus+'</td><td>'+sT.plus+'</td></tr></tbody></table></div><p style="font-size:.8rem;color:#666">Effectifs : Garçons '+sG.n+' — Filles '+sF.n+' — Total '+sT.n+'. Si un chiffre est faux, corrige les demi-journées d\'absence ci-dessus puis touche Enregistrer les absences du mois.</p>'; try{ document.getElementById('ar-sign').innerHTML=(typeof SG_bloc==='function')?SG_bloc('arret'):'<p>Signatures : Enseignant(s) + Directeur + Visa CCEB (à régler dans Signature & Cachet).</p>'; }catch(e){ document.getElementById('ar-sign').innerHTML='<p>Signatures : Enseignant(s) + Directeur + Visa CCEB.</p>'; } }
@@ -798,7 +802,7 @@ function SG_save2(){ var old=SG_get(); var sg={ens1:document.getElementById('sg-
       <div id="gest-liste" style="margin-top:12px"></div>
       <div style="border:2px dashed #0a6b2e;border-radius:10px;padding:10px;margin-top:12px;background:#f6fff6"><p style="font-weight:800;margin:0 0 8px">✨ Générateur à distance — pour toi seul</p><p style="font-size:12px;color:#555;margin:0 0 8px">Le client t\u0027envoie son Gmail + son code TEL sur WhatsApp. Tu mets les 2 ici, tu touches Générer, puis tu lui renvoies le code sur WhatsApp.</p><div class="fg"><label>Gmail du client</label><input type="text" id="gest-gen-gmail" placeholder="client@gmail.com"/></div><div class="fg"><label>Code TEL du client</label><input type="text" id="gest-gen-tel" placeholder="TEL-........"/></div><button class="bp2" onclick="GEST_genererCode()">🔢 Générer le code à 6 chiffres</button><p id="gest-gen-result" style="font-size:16px;font-weight:800;margin-top:10px;background:#eaffea;border:2px solid #0a6b2e;border-radius:10px;padding:12px"></p><div style="display:flex;gap:8px;margin-top:6px"><button class="bp2" onclick="GEST_copierCode()" style="background:#444">📋 Copier le code</button><button class="bp2" onclick="GEST_whatsappCode()" style="background:#25D366">💬 Envoyer le code sur WhatsApp</button></div>
       <div style="margin-top:14px"><h4 style="margin:0 0 8px;color:#0a6b2e">Registre des licences emises</h4><div id="gest-registre"></div></div></div>
-      <p style="font-size:12px;color:#666;margin-top:10px">Code à donner : va dans l'écran Licence, tape ton Gmail gestionnaire, puis Générateur, mets le Gmail + le code TEL du client. Pour débloquer un enseignant qui a changé de téléphone, touche <b>Débloquer</b> dans la liste.</p>
+      <p style="font-size:12px;color:#666;margin-top:10px">Code à donner : va dans l'écran Licence, tape ton Gmail gestionnaire, puis Générateur, mets le Gmail + le code TEL du client. Le code est différent pour chaque téléphone.<br>1 compte = 1 téléphone. Pour débloquer un enseignant qui a changé de téléphone, touche <b>Débloquer</b> dans la liste.</p>
       <button class="bp2" onclick="GEST_fermer()" style="background:#666">🔒 Fermer le Gestionnaire</button>
     </div>
   </div>
@@ -1783,7 +1787,7 @@ function printFeuilleComposition(cid, titre, matieresList){
     '<h1>'+titre+'</h1>'+
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th>'+colHeaders+'</tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html, titre);
 }
 // ===== CALCULS =====
@@ -1945,7 +1949,7 @@ function printBulletinAnnuelIndividuel(eid,cid){
   if(!e){toast('⚠️ Élève introuvable','#cc0000');return}
   var html=bulletinAnnuelHTML(eid,cid);
   var titre='Bulletin_Annuel_'+e.nom.replace(/[^a-z0-9]/gi,'_')+'_'+e.pre.replace(/[^a-z0-9]/gi,'_');
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style></head><body><div class="bpageAn" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div><\/body><\/html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style></head><body><div class="bpageAn" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div></body></html>',titre);
 }
 function printBulletinAnnuelClasse(cid){
   var cl=CL.find(function(c){return c.id===cid});
@@ -1957,7 +1961,7 @@ function printBulletinAnnuelClasse(cid){
     pages+='<div class="bpageAn">'+htmls[i]+(htmls[i+1]?htmls[i+1]:'<div style="height:128mm"></div>')+'</div>';
   }
   var titre='Bulletins_Annuels_'+(cl?cl.nom.replace(/[^a-z0-9]/gi,'_'):'Classe');
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style></head><body>'+pages+'<\/body><\/html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_ANNUEL_CSS+'</style></head><body>'+pages+'</bo'+'dy></ht'+'ml>',titre);
 }
 
 // ===== FEUILLE DE RÉSULTATS (registre de classe pour l'inspection) =====
@@ -2070,7 +2074,7 @@ function printFeuilleResultats(){
     '<h1>FEUILLE DE RÉSULTATS'+(sortMode==='alpha'?' (ordre alphabétique)':' (ordre de mérite)')+'</h1>'+
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th>'+matHeaders+'<th>Total</th><th>Moy/10</th><th>Rang</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(res.cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html,'Feuille_Resultats_'+res.cl.nom.replace(/[^a-z0-9]/gi,'_')+'_'+tnames[tr].replace(/[^a-z0-9]/gi,'_'));
 }
 
@@ -2178,7 +2182,7 @@ function PB(eid,cid,tr){
   var html=bulletinHTML(e,cl,tr,elevs,ranked);
   var tnames={'1':'T1','2':'T2','3':'T3'};
   var titre='Bulletin_'+e.nom+'_'+e.pre+'_'+tnames[tr];
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style></head><body><div class="bpage" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div>'+FIT_SCRIPT+'<\/body><\/html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style></head><body><div class="bpage" style="justify-content:center"><div style="margin:auto;width:100%">'+html+'</div></div>'+FIT_SCRIPT+'</bo'+'dy></ht'+'ml>',titre);
 }
 function PBClasse(cid,tr){
   var cl=CL.find(function(c){return c.id===cid});
@@ -2197,7 +2201,7 @@ function PBClasse(cid,tr){
   }
   var tnames={'1':'T1','2':'T2','3':'T3'};
   var titre='Bulletins_'+(cl?cl.nom.replace(/[^a-z0-9]/gi,'_'):'Classe')+'_'+tnames[tr];
-  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style></head><body>'+pages+FIT_SCRIPT+'<\/body><\/html>',titre);
+  OP('<html><head><title>'+titre+'</title><style>'+BULLETIN_CSS+'</style></head><body>'+pages+FIT_SCRIPT+'</bo'+'dy></ht'+'ml>',titre);
 }
 // ===== CARTES =====
 function LC(){
@@ -2365,7 +2369,7 @@ function BPC(elevs,cl,an){
   '.csigph{font-size:6pt;color:#aaa;font-style:italic}'+
   '.cdirname{text-align:center;font-size:5.3pt;font-weight:700;color:#1a1a2e;padding:0.3mm 0;flex-shrink:0}'+
   '.cbar{text-align:center;font-size:5.5pt;letter-spacing:1.5px;color:#999;font-family:monospace;flex-shrink:0;padding:0.8mm 0;border-top:1px solid #eee;background:#fafafa}'+
-  '</style></head><body>'+cards+'<\/body><\/html>',titreCartes);
+  '</style></head><body>'+cards+'</bo'+'dy></ht'+'ml>',titreCartes);
 }
 // ===== CERTIFICATS =====
 function LCE(){
@@ -2399,7 +2403,7 @@ function PCE(eid){
     + '<p class="bt">Certifie que '+civil+' <b>'+e.nom+' '+e.pre+'</b>, '+neTxt+' le <b>'+fd(e.ddn)+'</b> à <b>'+(e.lieu||pointCourt)+'</b>, de <b>'+nomPere+'</b> et de <b>'+nomMere+'</b>,</p>'
     + '<p class="bt">est '+inscritTxt+' dans mon établissement depuis le <b>'+dateEntree+'</b>, où il est '+eleveTxt+' dans la classe de <b>'+(cl?cl.nom:'................................................')+'</b>, au titre de l\'année scolaire <b>'+(PA.annee||'................................................')+'</b>.</p>'
     + '<p class="bt">En foi de quoi, le présent certificat est établi <b>pour servir et valoir ce que de droit</b>.</p>';
-  OP('<html><head><title>'+titreCert+'</title><style>body{font-family:Georgia,serif;padding:10mm;color:#111;font-size:12px}@page{size:A4 portrait;margin:10mm}.brd{border:3px double #0a5c2e;padding:22px 26px;position:relative}.hdr{text-align:center;border-bottom:2px solid #0a5c2e;padding-bottom:12px;margin-bottom:15px}h1{color:#0a5c2e;font-size:1.1em;letter-spacing:2px;text-transform:uppercase;margin:6px 0}h2{color:#0a5c2e;font-size:1.3em;text-transform:uppercase;letter-spacing:3px;margin:12px 0 6px;text-align:center}.bt{font-size:1.05em;line-height:1.9;text-align:justify;margin:10px 0}.ft{margin-top:12mm;display:flex;justify-content:flex-end}.ft-in{text-align:center;width:55%}.ft-in .lieu{font-weight:700}.ft-in .dir{margin-top:8px;font-weight:800;text-decoration:underline}.ft-in .gap{height:18mm}.ft-in .sig{border-top:1.5px solid #0a5c2e;padding-top:6px;font-weight:800}.ft-in .nom{margin-top:6px;font-weight:800}</style></head><body><div class="brd"><div class="hdr"><p style="color:#666;font-style:italic">La Patrie ou la Mort, nous Vaincrons !</p><p style="font-size:.85em;color:#666">BURKINA FASO</p><h1>'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</h1><p style="font-size:.85em">'+(PA.type||'')+'</p><p style="font-size:.8em;color:#666">'+(PA.region||'')+' '+(PA.province?'– '+PA.province:'')+' '+(PA.ville?'– '+PA.ville:'')+' | Tél : '+(PA.tel||'—')+'</p></div><h2>Certificat de Scolarité</h2>'+corps+'<div class="ft"><div class="ft-in"><p class="lieu">Fait à '+(PA.ville||'........................')+', le '+dt+'</p><p class="dir">Le Directeur</p><div class="gap"></div>'+SG_img("sigDir",46)+'<div style="margin-top:4px">'+SG_cachetImg(46)+'</div><p class="sig">Signature et Cachet</p><p class="nom">'+(PA.dir||'')+'</p></div></div></div><\/body><\/html>',titreCert);
+  OP('<html><head><title>'+titreCert+'</title><style>body{font-family:Georgia,serif;padding:10mm;color:#111;font-size:12px}@page{size:A4 portrait;margin:10mm}.brd{border:3px double #0a5c2e;padding:22px 26px;position:relative}.hdr{text-align:center;border-bottom:2px solid #0a5c2e;padding-bottom:12px;margin-bottom:15px}h1{color:#0a5c2e;font-size:1.1em;letter-spacing:2px;text-transform:uppercase;margin:6px 0}h2{color:#0a5c2e;font-size:1.3em;text-transform:uppercase;letter-spacing:3px;margin:12px 0 6px;text-align:center}.bt{font-size:1.05em;line-height:1.9;text-align:justify;margin:10px 0}.ft{margin-top:12mm;display:flex;justify-content:flex-end}.ft-in{text-align:center;width:55%}.ft-in .lieu{font-weight:700}.ft-in .dir{margin-top:8px;font-weight:800;text-decoration:underline}.ft-in .gap{height:18mm}.ft-in .sig{border-top:1.5px solid #0a5c2e;padding-top:6px;font-weight:800}.ft-in .nom{margin-top:6px;font-weight:800}</style></head><body><div class="brd"><div class="hdr"><p style="color:#666;font-style:italic">La Patrie ou la Mort, nous Vaincrons !</p><p style="font-size:.85em;color:#666">BURKINA FASO</p><h1>'+(PA.nom||'ÉTABLISSEMENT SCOLAIRE')+'</h1><p style="font-size:.85em">'+(PA.type||'')+'</p><p style="font-size:.8em;color:#666">'+(PA.region||'')+' '+(PA.province?'– '+PA.province:'')+' '+(PA.ville?'– '+PA.ville:'')+' | Tél : '+(PA.tel||'—')+'</p></div><h2>Certificat de Scolarité</h2>'+corps+'<div class="ft"><div class="ft-in"><p class="lieu">Fait à '+(PA.ville||'........................')+', le '+dt+'</p><p class="dir">Le Directeur</p><div class="gap"></div>'+SG_img("sigDir",46)+'<div style="margin-top:4px">'+SG_cachetImg(46)+'</div><p class="sig">Signature et Cachet</p><p class="nom">'+(PA.dir||'')+'</p></div></div></div></body></html>',titreCert);
 }
 
 // ===== FICHES =====
@@ -2739,7 +2743,7 @@ function printSynoptique(cid,tr){
     matRows+
     '</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div><div class="sb">Cachet de l\'école</div></div>'+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html,titreSynop);
 }
 
@@ -2900,7 +2904,7 @@ function printListeAlpha(){
     '</div>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">Le Conseil des Enseignants</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
     designerCredit()+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html,titre);
 }
 
@@ -3042,7 +3046,7 @@ function printRecapEcole(){
       '<div class="sb3"><div class="line">Le Directeur</div></div>'+
       '<div class="sb3"><div class="line">Monsieur le Chef de Circonscription</div></div>'+
     '</div>'+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html,titreRecap);
 }
 
@@ -3274,7 +3278,7 @@ function printExResultats(){
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th>'+matHeaders+'<th>Total</th><th>Moy/10</th><th>Rang</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(res.cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
     designerCredit()+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html,titreExRes);
 }
 
@@ -3456,7 +3460,7 @@ function printExSynoptique(exam,cid){
     matRows+
     '</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">L\'Enseignant(e)</span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sbnom">'+(PA.dir||'—')+'</span></div><div class="sb">Cachet de l\'école</div></div>'+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html,titreExSynop);
 }
 
@@ -3561,7 +3565,7 @@ function PPR(cid){
     '<p class="cnt">Passent : '+c.Passe+' | Redoublent : '+c.Redouble+' | Exclus : '+c.Exclu+' | Abandons : '+c.Abandon+(c.Aucune?' | Sans décision : '+c.Aucune:'')+' | Total : '+c.total+'</p>'+
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Sexe</th><th>Classe</th><th>Âge</th><th>T1</th><th>T2</th><th>T3</th><th>Moy/10</th><th>Rang</th><th>Décision</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb"><span class="sbtitre">Le / Les Maître(s)</span><span class="sgap"></span><span class="sbnom">'+ensNom(cl)+'</span></div><div class="sb"><span class="sbtitre">Le Directeur</span><span class="sgap"></span><span class="sbnom">'+(PA.dir||'—')+'</span></div></div>'+
-    designerCredit()+'<\/body><\/html>';
+    designerCredit()+'</bo'+'dy></ht'+'ml>';
   OP(html,titreProp);
 }
 
@@ -3648,7 +3652,7 @@ function printEmargementConseil(){
     '<table><thead><tr><th>N°</th><th>Nom et Prénom</th><th>Classe</th><th>Émargement</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="sig"><div class="sb">Le Directeur</div><div class="sb">Secrétaire de séance</div></div>'+
     designerCredit()+
-    '<\/body><\/html>';
+    '</body></html>';
   OP(html, titre);
 }
 
@@ -3781,8 +3785,8 @@ function OP(html,title){
   // On insère aussi le nom du document de façon lisible juste avant la fermeture du body,
   // pour qu'il soit visible dans le PDF imprimé lui-même (indépendant du comportement du navigateur).
   html = html.replace('</head>','<style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>');
-  if(title && html.indexOf('<\/body>') !== -1 && html.indexOf('class="cpage"') === -1 && html.indexOf('class="bpage') === -1){
-    html = html.replace('<\/body>', docNameFooter(title) + '<\/body>');
+  if(title && html.indexOf('</body>') !== -1 && html.indexOf('class="cpage"') === -1 && html.indexOf('class="bpage') === -1){
+    html = html.replace('</body>', docNameFooter(title) + '</body>');
   }
   var old=document.getElementById('print-frame');
   if(old)old.remove();
@@ -3991,14 +3995,14 @@ try{FP_majDisc();var d=document.getElementById('fp-date');if(d) d.value=new Date
     try{
       if(typeof html==='string'){
         if(html.indexOf('Synoptique')!==-1 && typeof SG_bloc==='function'){
-          html = html.replace('<\/body>', '<div style="padding:0 10mm">'+SG_bloc('bulletin')+'</div><\/body>');
+          html = html.replace('</body>', '<div style="padding:0 10mm">'+SG_bloc('bulletin')+'</div></body>');
         } else if((html.indexOf('Proposition')!==-1 || html.indexOf('proposition')!==-1) && typeof SG_bloc==='function'){
-          html = html.replace('<\/body>', '<div style="padding:0 10mm">'+SG_bloc('certificat')+'</div><\/body>');
+          html = html.replace('</body>', '<div style="padding:0 10mm">'+SG_bloc('certificat')+'</div></body>');
         } else if(html.indexOf('Résultats')!==-1 && typeof SG_bloc==='function'){
-          html = html.replace('<\/body>', '<div style="padding:0 10mm">'+SG_bloc('bulletin')+'</div><\/body>');
+          html = html.replace('</body>', '<div style="padding:0 10mm">'+SG_bloc('bulletin')+'</div></body>');
         } else if((html.indexOf('Fiche de Pr')!==-1 || html.indexOf('FICHE DE PR')!==-1) && typeof SG_bloc==='function'){
           html = html.replace('</head>', '<style>@media print{ @page{ size:A4 portrait; margin:10mm; } body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; } .f-page{ page-break-after:always; break-after:page; } }</style></head>');
-          html = html.replace('<\/body>', '<div style="padding:0 10mm">'+SG_bloc('fiche')+'</div><\/body>');
+          html = html.replace('</body>', '<div style="padding:0 10mm">'+SG_bloc('fiche')+'</div></body>');
         }
       }
     }catch(e){}
@@ -4124,132 +4128,6 @@ try{FP_majDisc();var d=document.getElementById('fp-date');if(d) d.value=new Date
   }, true);
 })();
 </script>
-
-<script>
-function EDUBF_creerRegistreDansGestionnaire(){
-  try{
-    var place=document.getElementById('gestcache-registre-place'); if(!place) return;
-    if(document.getElementById('edubf-registre-licences')) return;
-    place.innerHTML='<div id="edubf-registre-licences" style="padding:10px;border:2px solid #0a6b2e;border-radius:10px;background:#f6fff6">'
-    +'<h4 style="margin:0 0 8px;color:#0a6b2e">📋 Registre des licences émises</h4>'
-    +'<p style="font-size:12px;color:#555;margin:0 0 8px">Seul le gestionnaire voit ce registre. Chaque licence validée s’ajoute ici.</p>'
-    +'<div id="edubf-registre-liste" style="font-size:12px;color:#222">Aucune licence enregistrée pour le moment.</div>'
-    +'<button class="bp2" onclick="EDUBF_voirRegistre()" style="margin-top:8px;background:#0a6b2e">🔄 Actualiser le registre</button></div>';
-  }catch(e){}
-}
-function EDUBF_voirRegistre(){
-  EDUBF_creerRegistreDansGestionnaire();
-  try{
-    var list=[]; try{ list=JSON.parse(localStorage.getItem('edubf_registre_licences')||'[]'); }catch(e){ list=[]; }
-    var z=document.getElementById('edubf-registre-liste'); if(!z) return;
-    if(!list.length){ z.textContent='Aucune licence enregistrée pour le moment.'; return; }
-    var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr><th style="text-align:left;border-bottom:1px solid #ccc">Date</th><th style="text-align:left;border-bottom:1px solid #ccc">Gmail</th><th style="text-align:left;border-bottom:1px solid #ccc">TEL</th></tr>';
-    list.slice(-50).reverse().forEach(function(r){ h+='<tr><td style="padding:4px 2px;border-bottom:1px solid #eee">'+(r.date||'')+'</td><td style="padding:4px 2px;border-bottom:1px solid #eee">'+(r.gmail||'')+'</td><td style="padding:4px 2px;border-bottom:1px solid #eee">'+(r.tel||'')+'</td></tr>'; });
-    h+='</table>'; z.innerHTML=h;
-  }catch(e){}
-}
-window.EDUBF_voirRegistre=EDUBF_voirRegistre;
-document.addEventListener('click', function(e){
-  var b=e.target && e.target.closest ? e.target.closest('button') : null;
-  if(b && b.textContent && b.textContent.indexOf('Valider ma licence')!==-1){
-    setTimeout(function(){
-      try{
-        var lic=JSON.parse(localStorage.getItem('edubf_licence_v48')||'null'); if(!lic||!lic.gmail) return;
-        var list=JSON.parse(localStorage.getItem('edubf_registre_licences')||'[]');
-        var deja=list.some(function(r){ return r.gmail===lic.gmail && r.tel===lic.device; });
-        if(!deja){ list.push({gmail:lic.gmail, tel:lic.device||'', date:new Date().toLocaleDateString('fr-FR')}); localStorage.setItem('edubf_registre_licences', JSON.stringify(list)); }
-        EDUBF_voirRegistre();
-      }catch(err){}
-    }, 800);
-  }
-});
-setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 1500);
-setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
-</script>
-
-<script>
-// LOT 2 - IMPRESSION SANS APPSGEYSER : on ne passe plus par Télécharger / OPEN FILE / SAVE FILE qui fait planter.
-// On affiche le document dans l'application, avec un bouton Imprimer qui utilise l'impression du téléphone.
-(function(){
-  // Neutralise l'ancien bouton Télécharger qui ouvrait la fenêtre AppsGeyser
-  window.showDownloadFallback = function(){};
-  var OP_ancien = window.OP;
-  window.OP = function(html, title){
-    try{
-      var old=document.getElementById('edubf-print-overlay'); if(old) old.remove();
-      var old2=document.getElementById('dl-fallback'); if(old2) old2.remove();
-      var old3=document.getElementById('print-frame'); if(old3) old3.remove();
-      // Ajoute style impression
-      try{ html = html.replace('</head>','<style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>'); }catch(e){}
-      var overlay=document.createElement('div');
-      overlay.id='edubf-print-overlay';
-      overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#fff;display:flex;flex-direction:column';
-      overlay.innerHTML='<div style="display:flex;gap:6px;padding:8px;background:#0a6b2e;color:#fff;align-items:center;flex-wrap:wrap">'
-        +'<span style="flex:1 1 100%;font-weight:700;font-size:14px">📄 '+(title||'Document')+'</span>'
-        +'<button id="edubf-print-btn" style="background:#fff;color:#0a6b2e;border:none;border-radius:8px;padding:8px 10px;font-weight:700;font-size:13px;flex:1 1 auto;white-space:nowrap">🖨️ Imprimer</button>'
-        +'<button id="edubf-print-share" style="background:#ff9800;color:#fff;border:none;border-radius:8px;padding:8px 10px;font-weight:700;font-size:13px;flex:1 1 auto;white-space:nowrap">📤 Partager / PDF</button>'
-        +'<button id="edubf-print-close" style="background:#333;color:#fff;border:none;border-radius:8px;padding:8px 10px;font-weight:700;font-size:13px;flex:1 1 auto;white-space:nowrap">✕ Fermer</button></div>'
-        +'<div style="padding:8px;background:#f0f0f0;font-size:12px;color:#333">Vérifie ton document ici. Touche <b>Imprimer</b> en haut ou en bas. Pour revenir, touche toujours <b>⬅ Retour</b> en bas, ne touche pas au bouton retour du téléphone.</div>'
-        +'<div style="position:fixed;left:0;right:0;bottom:0;z-index:100000;display:flex;gap:8px;padding:10px;background:#0a6b2e">'
-        +'<button id="edubf-retour-bas" style="flex:1;background:#fff;color:#0a6b2e;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px">⬅ Retour à la rubrique</button>'
-        +'<button id="edubf-print-bas" style="flex:1;background:#ff9800;color:#fff;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px">🖨️ Imprimer ici</button></div>';
-      var frame=document.createElement('iframe');
-      frame.style.cssText='flex:1;width:100%;border:none;background:#fff;padding-bottom:70px';
-      overlay.appendChild(frame);
-      document.body.appendChild(overlay);
-      var doc=frame.contentWindow.document; doc.open(); doc.write(html); doc.close();
-      try{ if(title) doc.title=title; }catch(e){}
-      document.getElementById('edubf-print-close').onclick=function(){ overlay.remove(); };
-      var btnRetour=document.getElementById('edubf-retour-bas'); if(btnRetour) btnRetour.onclick=function(){ overlay.remove(); };
-      var btnPrintBas=document.getElementById('edubf-print-bas'); if(btnPrintBas) btnPrintBas.onclick=function(){
-        try{ frame.contentWindow.focus(); frame.contentWindow.print(); }catch(e){
-          alert('Si rien ne s’ouvre, touche les 3 points en haut à droite du téléphone, puis Partager, puis Imprimer. Pour revenir, touche Retour en bas.');
-        }
-      };
-      document.getElementById('edubf-print-share').onclick=function(){
-        try{
-          var blob=new Blob([html], {type:'text/html'});
-          var file=new File([blob], (title||'EduBF')+'.html', {type:'text/html'});
-          if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-            navigator.share({title:title||'EduBF', files:[file]}).catch(function(){ alert('Choisis Imprimer ou Enregistrer en PDF dans la liste qui va s’ouvrir.'); });
-          } else if(navigator.share){
-            navigator.share({title:title||'EduBF', text:'Document EduBF : '+(title||'')}).catch(function(){});
-          } else {
-            alert('Ton téléphone ne permet pas Partager. Touche Ouvrir dans Chrome, puis Imprimer là-bas.');
-          }
-        }catch(e){ alert('Touche Ouvrir dans Chrome pour imprimer.'); }
-      };
-      document.getElementById('edubf-print-btn').onclick=function(){
-        try{ frame.contentWindow.focus(); frame.contentWindow.print(); }catch(e){ alert('Touche Imprimer de nouveau, ou utilise le menu du téléphone.'); }
-      };
-      // Petit délai : on laisse le document se charger, on n'ouvre PAS la fenêtre Télécharger
-    }catch(e){
-      // Si ça échoue, on retombe sur l'ancienne méthode sans le Télécharger
-      try{ if(OP_ancien) OP_ancien(html,title); }catch(err){}
-    }
-  };
-})();
-</script>
-
-<script>
-(function(){
-  setInterval(function(){
-    document.querySelectorAll('div,span,p').forEach(function(el){
-      var t=(el.textContent||'').trim().toLowerCase();
-      if(t.indexOf('élève enregistré')>=0 && el.children.length===0 && !el.dataset.f68){ el.dataset.f68='1'; setTimeout(function(){ el.style.display='none'; }, 2000); }
-    });
-  }, 800);
-  document.addEventListener('click', function(e){
-    var b=e.target.closest('button,a'); if(!b) return;
-    var t=(b.textContent||'').toLowerCase();
-    if(t.indexOf('imprimer')>=0 && navigator.userAgent.indexOf('wv')>=0){
-      e.preventDefault(); e.stopPropagation();
-      window.location.href='intent://fasoecoleprobf.github.io/EduBF-/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent('https://fasoecoleprobf.github.io/EduBF-/')+';end';
-    }
-  }, true);
-})();
-</script>
 </body>
-
 
 </html>
