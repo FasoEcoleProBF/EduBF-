@@ -413,63 +413,7 @@ function FP2_imprimer(){
   var nomClasse=(FP2_sel.classe||'').replace(/[^a-zA-Z0-9À-ÿ]/g,'')||'Classe';
   var nomFichier='Fiche_'+titreTxt+'_'+nomClasse;
   var css='@page{size:A4 portrait;margin:12mm}body{font-family:Arial;padding:0;color:#111;font-size:13px;line-height:1.5}.f-head{text-align:center;border-bottom:2px solid #0a6b2e;padding-bottom:10px}.ecole{font-size:18px;font-weight:800}.lecon{font-size:22px;font-weight:900;color:#0a6b2e;margin:8px 0}.meta{margin:10px 0;line-height:1.6}h3{font-size:15px;margin:14px 0 6px;color:#0a6b2e;border-bottom:1px solid #0a6b2e}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #111;padding:6px;vertical-align:top;line-height:1.5}tr{page-break-inside:avoid}.sig{display:flex;justify-content:space-between;margin-top:16px}';
-  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'
-
-
-
-
-
-<!-- PATCH V66 : Plus de bouton collé, plus d'écran blanc -->
-<style>body{padding-bottom:90px !important}</style>
-<script>
-(function(){
-  // 1. Enlever toutes les barres collées qui bloquaient l'écran
-  function nettoyer(){
-    ['edubf-v64-bar','edubf-aide-fichier'].forEach(function(id){
-      var e=document.getElementById(id); if(e) e.remove();
-    });
-    document.querySelectorAll('div').forEach(function(d){
-      var t=(d.textContent||'');
-      if(t.indexOf('Dans l’application, Imprimer est bloqué')>=0 && d.children.length<3){ d.remove(); }
-    });
-  }
-  setInterval(nettoyer, 1000);
-  // 2. Toast "élève enregistré" part après 2 secondes
-  setInterval(function(){
-    document.querySelectorAll('div,span,p').forEach(function(el){
-      var t=(el.textContent||'').trim().toLowerCase();
-      if(t.indexOf('élève enregistré')>=0 && el.children.length===0 && !el.dataset.f66){
-        el.dataset.f66='1'; setTimeout(function(){ el.style.display='none'; }, 2000);
-      }
-    });
-  }, 800);
-  // 3. Un seul bouton Chrome, qui s'ouvre VRAIMENT
-  window.EduBF_imprimerChrome = function(){
-    var url='https://fasoecoleprobf.github.io/EduBF-/';
-    try{ document.title='EduBF_Document_'+new Date().toISOString().slice(0,10); }catch(e){}
-    // Force Chrome depuis AppsGeyser
-    window.location.href='intent://fasoecoleprobf.github.io/EduBF-/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end';
-    setTimeout(function(){ alert('Dans Chrome :\n1. Touche Imprimer\n2. Choisis Enregistrer en PDF\n3. Retrouve le fichier dans Chrome > 3 points > Téléchargements'); }, 1500);
-  };
-  // 4. Si on touche un bouton Imprimer dans l'app, on va dans Chrome au lieu de rester bloqué
-  document.addEventListener('click', function(e){
-    var b=e.target.closest('button,a'); if(!b) return;
-    var t=(b.textContent||'').toLowerCase();
-    if(t.indexOf('imprimer')>=0 && navigator.userAgent.indexOf('wv')>=0){
-      e.preventDefault(); e.stopPropagation(); window.EduBF_imprimerChrome();
-    }
-  }, true);
-  // 5. Cacher le code qui fuit en bas
-  setInterval(function(){
-    document.querySelectorAll('div,pre,code,p,span').forEach(function(el){
-      var t=el.textContent||'';
-      if((t.indexOf('OP(html')>=0 || t.indexOf('fp2-ecole')>=0) && el.children.length===0) el.style.display='none';
-    });
-  }, 1000);
-})();
-</script>
-<\/body>
-<\/html>';
+  var copie=out.cloneNode(true);var bts=copie.querySelectorAll('button');for(var bi=0;bi<bts.length;bi++){bts[bi].remove();}var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+nomFichier+'</title><style>'+css+'</style></head><body>'+copie.innerHTML+'<\/body><\/html>';
   OP(html,nomFichier);
 }
 ['fp2-ecole','fp2-ceb','fp2-date','fp2-garc','fp2-fill','fp2-theme','fp2-titre'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=function(){FP2_generer();};el.onchange=function(){FP2_generer();};}});
@@ -4286,6 +4230,26 @@ setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
   };
 })();
 </script>
+
+<script>
+(function(){
+  setInterval(function(){
+    document.querySelectorAll('div,span,p').forEach(function(el){
+      var t=(el.textContent||'').trim().toLowerCase();
+      if(t.indexOf('élève enregistré')>=0 && el.children.length===0 && !el.dataset.f68){ el.dataset.f68='1'; setTimeout(function(){ el.style.display='none'; }, 2000); }
+    });
+  }, 800);
+  document.addEventListener('click', function(e){
+    var b=e.target.closest('button,a'); if(!b) return;
+    var t=(b.textContent||'').toLowerCase();
+    if(t.indexOf('imprimer')>=0 && navigator.userAgent.indexOf('wv')>=0){
+      e.preventDefault(); e.stopPropagation();
+      window.location.href='intent://fasoecoleprobf.github.io/EduBF-/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent('https://fasoecoleprobf.github.io/EduBF-/')+';end';
+    }
+  }, true);
+})();
+</script>
 </body>
+
 
 </html>
