@@ -167,10 +167,10 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
-<!-- LICENCE EduBFv2 - V64 -->
+<!-- LICENCE EduBFv2 - V65 -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
-    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V64 — Licence</h2>
+    <h2 style="text-align:center;margin:0 0 6px;color:#0a6b2e">🔒 EduBFv2 - V65 — Licence</h2>
     <p style="text-align:center;font-size:11px;color:#999;margin:0 0 14px">Licence personnelle</p>
     <div id="licence-msg" style="display:none;background:#ffe9e9;border:1px solid #cc0000;color:#a00;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
     <label style="font-weight:700;font-size:13px">Gmail de l'enseignant</label>
@@ -615,7 +615,103 @@ function FP2_imprimer(){
   }, 500);
 })();
 </script>
+
+<!-- PATCH V65 : Message qui ne reste plus + Toast qui disparait + Pub qui ne bloque plus -->
+<style>
+  /* Le contenu ne doit plus être caché derrière les boutons du bas */
+  body{ padding-bottom: 130px !important; }
+  /* Tous les petits messages "élève enregistré" doivent partir vite */
+  .toast, .notification, .alert-success, [id*="toast"], [class*="toast"]{
+    animation: edubf-toast-out 0.5s ease 2s forwards !important;
+  }
+  @keyframes edubf-toast-out{ to{ opacity:0; visibility:hidden; transform:translateY(20px); } }
+</style>
+<script>
+(function(){
+  // 1. Le message jaune en haut : on met une croix X pour le fermer, et il part tout seul après 5 secondes
+  function fixerBandeau(){
+    document.querySelectorAll('div').forEach(function(d){
+      var t = (d.textContent||'');
+      if(t.indexOf('Dans l’application, Imprimer est bloqué')>=0 && !d.dataset.edubfFix){
+        d.dataset.edubfFix='1';
+        d.style.cssText += ';position:relative;';
+        var x = document.createElement('button');
+        x.textContent='✕ Fermer';
+        x.style.cssText='background:#000;color:#fff;border:0;padding:6px 10px;border-radius:20px;margin-left:8px;font-weight:700;';
+        x.onclick=function(){ d.remove(); };
+        d.appendChild(x);
+        setTimeout(function(){ try{d.remove();}catch(e){} }, 5000);
+      }
+    });
+  }
+  setInterval(fixerBandeau, 1000);
+
+  // 2. Le message "élève enregistré" qui reste en bas : on le fait disparaître après 2 secondes
+  function fixerToast(){
+    document.querySelectorAll('div, span, p').forEach(function(el){
+      var t = (el.textContent||'').trim().toLowerCase();
+      if((t.indexOf('élève enregistré')>=0 || t.indexOf('eleve enregistre')>=0 || t.indexOf('enregistré avec succès')>=0) && el.children.length===0){
+        if(!el.dataset.edubfToast){
+          el.dataset.edubfToast='1';
+          el.style.cssText += ';position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:99999;background:#16a34a;color:#fff;padding:10px 16px;border-radius:20px;box-shadow:0 2px 10px rgba(0,0,0,.3);';
+          setTimeout(function(){ try{ el.remove(); }catch(e){ el.style.display='none'; } }, 2000);
+        }
+      }
+    });
+    // Aussi : tous les toasts génériques qui restent collés en bas
+    document.querySelectorAll('.toast, .notification').forEach(function(el){
+      if(!el.dataset.edubfToast2){ el.dataset.edubfToast2='1'; setTimeout(function(){ el.style.display='none'; }, 2000); }
+    });
+  }
+  setInterval(fixerToast, 800);
+
+  // 3. Le bouton orange en bas ne doit plus être collé et bloquer : il devient un bouton normal qui suit la page, avec une croix
+  function fixerBoutonOrange(){
+    var bar = document.getElementById('edubf-v64-bar');
+    if(bar && !bar.dataset.edubfFix2){
+      bar.dataset.edubfFix2='1';
+      bar.style.cssText='position:relative;margin:12px;padding:0;background:transparent;z-index:10;';
+      var close = document.createElement('button');
+      close.textContent='✕ Cacher ce bouton';
+      close.style.cssText='background:#fff;border:1px solid #999;padding:6px 10px;border-radius:20px;font-size:12px;margin-top:6px;';
+      close.onclick=function(){ bar.style.display='none'; };
+      bar.appendChild(close);
+    }
+    var aide = document.getElementById('edubf-aide-fichier');
+    if(aide){ aide.style.position='relative'; aide.style.bottom='auto'; aide.style.right='auto'; aide.style.margin='10px'; }
+  }
+  setInterval(fixerBoutonOrange, 1000);
+
+  // 4. Cacher le code qui apparaît en bas de page (le texte avec OP(html... fp2-ecole)
+  function cacherCode(){
+    document.querySelectorAll('div, pre, code, p, span').forEach(function(el){
+      var t = el.textContent||'';
+      if(t.indexOf('OP(html')>=0 || t.indexOf('fp2-ecole')>=0){
+        if(el.children.length===0) el.style.display='none';
+      }
+    });
+  }
+  setInterval(cacherCode, 1000);
+
+  // 5. Quand on touche Imprimer, ne plus laisser le message d'erreur rester : on ouvre Chrome tout de suite
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('button, a');
+    if(!b) return;
+    var t = (b.textContent||'').toLowerCase();
+    if(t.indexOf('imprimer')>=0){
+      // On enlève tous les messages d'erreur visibles
+      setTimeout(function(){
+        document.querySelectorAll('div').forEach(function(d){
+          var dt = (d.textContent||'').toLowerCase();
+          if(dt.indexOf('erreur')>=0 && dt.length<300 && d.children.length===0){ d.style.display='none'; }
+        });
+      }, 500);
+    }
+  }, true);
+})();
+</script>
 </body>
+
 
 </html>';
   OP(html,nomFichier);
