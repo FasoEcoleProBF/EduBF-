@@ -4432,6 +4432,12 @@ setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
   window.EDUBF_AIDE_LICENCE = "Client : 1) Mets ton Gmail 2) Mets ton mot de passe 3) Demande ton code au gestionnaire sur WhatsApp. Si tu changes de telephone, le gestionnaire te de bloque dans son Registre, tu remets le meme Gmail + meme code, ca remarche.";
 })();
 </script>
+
+<!-- OFFLINE V74 -->
+<div id="edubf-offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#ff9800;color:#000;text-align:center;padding:6px;font-weight:700;font-size:13px">📴 Hors réseau — tu peux travailler, tes données restent dans le téléphone</div>
+<script>
+(function(){function maj(){var b=document.getElementById('edubf-offline-banner'); if(!b) return; if(navigator.onLine===false){b.style.display='block';} else {b.style.display='none';}} window.addEventListener('online',maj); window.addEventListener('offline',maj); maj(); setInterval(function(){try{localStorage.setItem('edubf_dernier_save', new Date().toISOString());}catch(e){}}, 30000); })();
+</script>
 </body>
 
 
