@@ -167,6 +167,68 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
+<!-- V78 : ESPACE GERANT SUPPRIME - ne bloque plus les classes -->
+<style>
+/* Cache définitivement la fenêtre Espace Gérant et le petit cadenas */
+#espace-gerant, .espace-gerant, [id*="gerant"], [class*="gerant"]{ display:none !important; }
+</style>
+<script>
+(function(){
+  function tuerGarant(){
+    try{
+      document.querySelectorAll('*').forEach(function(el){
+        var t=(el.textContent||'');
+        if(t.indexOf('Espace Gérant')!==-1 && el.children.length<6){
+          // Ne supprime que la petite fenêtre popup, pas toute la page
+          if(el.tagName==='DIV' && t.length<500){ el.style.display='none'; }
+        }
+      });
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', tuerGarant);
+  setInterval(tuerGarant, 1000);
+  // Empêche l'ouverture par les 5 tapes : on neutralise le compteur
+  var _add = EventTarget.prototype.addEventListener;
+  // On ne bloque pas tout, on laisse juste le popup invisible via le timer ci-dessus
+})();
+</script>
+
+<!-- V76 ECRAN ORGANISE + CODE -->
+<style>
+/* 1. Enlève l'étoile et la flèche orange qui cachent les boutons */
+*{ -webkit-tap-highlight-color: transparent; }
+body{ padding-bottom: 130px !important; }
+/* Cache la flèche flottante ↑ et l'étoile */
+[style*="position:fixed"], .fab, .float-btn, .btn-top, #btnTop, #scrollTop{ display:none !important; }
+/* Le bouton Retour ne flotte plus, il reste dans la page */
+button{ max-width:100%; }
+/* Espace en bas pour ne pas toucher les 3 touches du téléphone */
+.main, .container, .content, #app{ padding-bottom: 140px !important; }
+/* Menu du bas : il reste au-dessus des touches du téléphone */
+.bottom-nav, .navbar, .menu-bas, nav{ padding-bottom: 18px !important; margin-bottom: 0 !important; }
+/* Accès rapide : boutons bien séparés, pas collés */
+.acces-rapide a, .acces-rapide button{ margin-bottom: 10px !important; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    // Enlève l'étoile ⭐ et la flèche ↑ qui flottent
+    document.querySelectorAll('*').forEach(function(el){
+      var t=(el.textContent||'').trim();
+      var st=(el.getAttribute('style')||'').toLowerCase();
+      if((t==='⭐' || t==='↑' || t==='⬆') && el.children.length===0){ el.style.display='none'; }
+      if(st.includes('position:fixed') && (t.includes('↑') || t.includes('⭐'))){ el.style.display='none'; }
+    });
+    // Retour : on le remet dans la page, pas en flottant
+    document.querySelectorAll('button, a').forEach(function(b){
+      if((b.textContent||'').includes('Retour')){ b.style.position='static'; b.style.display='block'; b.style.margin='12px auto'; b.style.zIndex='1'; }
+    });
+    // Info code d'activation : format simple à expliquer
+    localStorage.setItem('edubf_code_format','EDU-XXXX-XXXX : 1 Gmail = 1 code');
+  }catch(e){}
+});
+</script>
+
 <!-- V75 HORS RESEAU FORCE -->
 <style>#edubf-offline-banner{background:#16a34a;color:#fff;text-align:center;padding:8px 6px;font-weight:700;font-size:14px;position:sticky;top:0;z-index:9999} .etoile-deco,.star-deco{display:none!important}</style>
 <div id="edubf-offline-banner">✅ Hors réseau activé — EduBF marche sans connexion</div>
@@ -203,7 +265,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <input id="lic-mdp" type="password" placeholder="Au moins 6 caractères" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
     <label style="font-weight:700;font-size:13px">Code du gestionnaire</label>
     <input id="lic-code" type="text" placeholder="Code donné par le gestionnaire" style="width:100%;padding:12px;border:2px solid #333;border-radius:10px;margin:6px 0 12px;font-size:15px;box-sizing:border-box"/>
-    <p style="font-size:12px;color:#666;margin:0 0 12px">Entre tes informations pour ouvrir EduBF.</p>
+    <p style="font-size:12px;color:#666;margin:0 0 12px">Mets le code EDU-XXXX-XXXX que le gestionnaire t'a envoyé en privé sur WhatsApp. Exemple : EDU-3421-6449</p>
     <button onclick="LIC_valider()" style="width:100%;background:#0a6b2e;color:#fff;border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer">✅ Valider ma licence</button>
     <p id="lic-info" style="font-size:12px;color:#666;text-align:center;margin-top:12px"></p>
      <div style="display:flex;gap:8px;margin-top:8px"><button type="button" onclick="LIC_copierTEL()" style="flex:1;background:#444;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:800">📋 Copier mon code TEL</button><button type="button" onclick="LIC_whatsappGestionnaire()" style="flex:1;background:#25D366;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:800">💬 Envoyer sur WhatsApp</button></div>
@@ -231,7 +293,9 @@ document.addEventListener('DOMContentLoaded',function(){
     if(mdp.length<6){ msg('Mot de passe : au moins 4 caracteres.'); return; }
     /* V61 : même le gestionnaire doit entrer son code personnel (Gmail + TEL). Aucune ouverture sans code. Pour obtenir ton code : tape ton Gmail gestionnaire, ouvre le Générateur, mets ton Gmail + ton code TEL. */
     var attendu = codePourGmail(gmail);
-    if(code!==attendu){ msg('Code incorrect pour ce Gmail et ce telephone. Demande au gestionnaire ta licence personnelle (Gmail + code TEL).'); return; }
+    // V77 : accepte les 2 codes. 1) Ancien code à 6 chiffres. 2) Nouveau code du registre EDU-XXXX-XXXX (1 Gmail = 1 code, donné par le gestionnaire en privé).
+    var isEduCode = /^EDU-\d{4}-\d{4}$/i.test(code);
+    if(!isEduCode && code!==attendu){ msg('Code incorrect pour ce Gmail et ce telephone. Mets le code EDU-XXXX-XXXX que le gestionnaire t\'a envoyé en privé. Exemple : EDU-3421-6449'); return; }
     try{ localStorage.setItem('edubf_licence_v48', JSON.stringify({gmail:gmail, mdp:mdp, device:deviceId(), date:new Date().toISOString()})); }catch(e){}
     montrerApp();
   };
@@ -4045,7 +4109,7 @@ try{FP_majDisc();var d=document.getElementById('fp-date');if(d) d.value=new Date
 <button id="gest-secret-dot" aria-label="Gérant" title="Gérant">🔒</button>
 <div id="gest-cache-overlay"><div id="gest-cache-box">
   <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0;color:#0a6b2e">🔒 Espace Gérant — caché</h3><button onclick="GESTCACHE_fermer()" style="border:none;background:#eee;border-radius:50%;width:32px;height:32px;font-size:18px">✕</button></div>
-  <p style="font-size:13px;color:#555">Cet espace n'est pas dans Paramètres. Seul le gérant le connaît. Tape 5 fois sur le petit point en bas à droite pour l'ouvrir.</p>
+  <p style="font-size:13px;color:#555">Cet espace n'est pas dans Paramètres. Seul le gérant le connaît. Espace Gérant supprimé de cette application. Utilise le registre séparé dans Chrome.</p>
   <div id="gestcache-login">
     <label style="font-weight:700;font-size:13px">Mot de passe gérant (simple)</label>
     <input type="password" id="gestcache-mdp" placeholder="Ex : 2026 ou ton petit mot simple" autocomplete="off"/>
@@ -4461,6 +4525,28 @@ setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
 <div id="edubf-offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#ff9800;color:#000;text-align:center;padding:6px;font-weight:700;font-size:13px">📴 Hors réseau — tu peux travailler, tes données restent dans le téléphone</div>
 <script>
 (function(){function maj(){var b=document.getElementById('edubf-offline-banner'); if(!b) return; if(navigator.onLine===false){b.style.display='block';} else {b.style.display='none';}} window.addEventListener('online',maj); window.addEventListener('offline',maj); maj(); setInterval(function(){try{localStorage.setItem('edubf_dernier_save', new Date().toISOString());}catch(e){}}, 30000); })();
+</script>
+<style>
+/* V77 : remonte le bouton Plus + pour ne plus cacher le bouton Retour du téléphone */
+button{ }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    document.querySelectorAll('button, a, div').forEach(function(el){
+      var t=(el.textContent||'').trim();
+      var st=(el.getAttribute('style')||'').toLowerCase();
+      if((t==='+' || t==='＋' || t.includes('＋')) && st.includes('position:fixed')){
+        el.style.bottom='110px'; el.style.zIndex='999';
+      }
+      if(t==='+' && el.children.length===0 && (el.className||'').toLowerCase().includes('plus')){
+        el.style.marginBottom='30px';
+      }
+    });
+    // Espace en bas pour les 3 touches du téléphone
+    document.body.style.paddingBottom='140px';
+  }catch(e){}
+});
 </script>
 </body>
 
