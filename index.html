@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestionnaire - EduBF</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:16px;color:#222}
+.card{background:#fff;border-radius:12px;padding:16px;max-width:520px;margin:20px auto;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+h2{margin:0 0 8px} input{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;margin:8px 0;box-sizing:border-box;font-size:16px}
+button{width:100%;padding:12px;border:0;border-radius:8px;background:#0b6e4f;color:#fff;font-size:16px;font-weight:bold}
+button.sec{background:#eee;color:#222;margin-top:8px} .err{color:#c00;font-weight:bold;display:none}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px} th,td{border:1px solid #ddd;padding:6px;text-align:left}
+.small{font-size:13px;color:#555}
+</style></head><body>
+<div class="card" id="loginCard">
+<h2>🔒 Gestionnaire</h2><p class="small">Réservé au gérant. Ne pas montrer aux clients.</p>
+<input type="password" id="pwd" placeholder="Mot de passe gestionnaire" inputmode="numeric">
+<p class="err" id="err">Mot incorrect. Réessaie.</p>
+<button onclick="entrer()">Entrer</button>
+<p class="small">Si tu as oublié, utilise le nouveau mot que tu as choisi.</p>
+</div>
+
+<div class="card" id="mainCard" style="display:none">
+<h2>✅ Gestionnaire ouvert</h2>
+<p class="small">Bienvenue, gérant.</p>
+<h3>📋 Registre des licences émises</h3>
+<input id="gmail" placeholder="Gmail du client">
+<input id="tel" placeholder="Code TEL / Téléphone">
+<input id="fin" type="date">
+<button onclick="ajouter()">+ Ajouter au registre</button>
+<table><thead><tr><th>Gmail</th><th>TEL</th><th>Fin</th><th></th></tr></thead><tbody id="liste"></tbody></table>
+<hr>
+<h3>🔑 Changer le mot de passe</h3>
+<input type="password" id="ancien" placeholder="Ancien mot de passe">
+<input type="password" id="nouveau" placeholder="Nouveau mot de passe">
+<button onclick="changer()">Changer le mot de passe</button>
+<button class="sec" onclick="fermer()">Fermer le Gestionnaire</button>
+</div>
+
+<script>
+function getPwd(){ return localStorage.getItem('edubf_gestionnaire_pwd') || '2014'; }
+function entrer(){
+  var v=document.getElementById('pwd').value.trim();
+  if(v===getPwd()){ document.getElementById('loginCard').style.display='none'; document.getElementById('mainCard').style.display='block'; afficher(); }
+  else { document.getElementById('err').style.display='block'; }
+}
+function changer(){
+  var a=document.getElementById('ancien').value.trim();
+  var n=document.getElementById('nouveau').value.trim();
+  if(a!==getPwd()){ alert('Ancien mot incorrect.'); return; }
+  if(n.length<4){ alert('Mets au moins 4 caractères pour le nouveau mot.'); return; }
+  localStorage.setItem('edubf_gestionnaire_pwd', n);
+  alert('Mot changé avec succès. Retiens bien le nouveau mot.');
+  document.getElementById('ancien').value=''; document.getElementById('nouveau').value='';
+}
+function getReg(){ try{ return JSON.parse(localStorage.getItem('edubf_registre')||'[]'); }catch(e){ return []; } }
+function afficher(){
+  var l=getReg(); var h='';
+  l.forEach(function(r,i){ h+='<tr><td>'+r.gmail+'</td><td>'+r.tel+'</td><td>'+r.fin+'</td><td><button style="width:auto;padding:6px" onclick="supprimer('+i+')">X</button></td></tr>'; });
+  document.getElementById('liste').innerHTML=h||'<tr><td colspan=4>Aucune licence pour le moment.</td></tr>';
+}
+function ajouter(){
+  var g=document.getElementById('gmail').value.trim(), t=document.getElementById('tel').value.trim(), f=document.getElementById('fin').value;
+  if(!g){ alert('Mets le Gmail.'); return; }
+  var l=getReg(); l.push({gmail:g,tel:t,fin:f}); localStorage.setItem('edubf_registre', JSON.stringify(l));
+  document.getElementById('gmail').value=''; document.getElementById('tel').value=''; afficher();
+}
+function supprimer(i){ var l=getReg(); l.splice(i,1); localStorage.setItem('edubf_registre', JSON.stringify(l)); afficher(); }
+function fermer(){ document.getElementById('mainCard').style.display='none'; document.getElementById('loginCard').style.display='block'; document.getElementById('pwd').value=''; }
+</script></body></html>
