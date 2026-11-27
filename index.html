@@ -167,6 +167,30 @@ button, .bp, .bn, .dc, .qa-btn, [onclick]{
 
 </head>
 <body>
+<!-- V75 HORS RESEAU FORCE -->
+<style>#edubf-offline-banner{background:#16a34a;color:#fff;text-align:center;padding:8px 6px;font-weight:700;font-size:14px;position:sticky;top:0;z-index:9999} .etoile-deco,.star-deco{display:none!important}</style>
+<div id="edubf-offline-banner">✅ Hors réseau activé — EduBF marche sans connexion</div>
+<script>
+try{
+  localStorage.setItem('edubf_offline_force','1');
+  localStorage.setItem('edubf_offline_mode','on');
+  // Bloque les appels réseau : tout reste en local
+  window.__edubfOffline=true;
+  var _fetch=window.fetch;
+  window.fetch=function(){ return Promise.reject(new Error('Hors réseau')); };
+  var _xhr=window.XMLHttpRequest;
+  // Ne casse pas l'app : on garde XHR mais on évite les mises à jour externes
+  window.addEventListener('online',function(e){ e.preventDefault(); });
+}catch(e){}
+document.addEventListener('DOMContentLoaded',function(){
+  try{
+    document.querySelectorAll('*').forEach(function(el){
+      if(el.textContent && el.textContent.trim()==='⭐' && el.children.length===0){ el.style.display='none'; }
+    });
+  }catch(e){}
+});
+</script>
+
 <!-- LICENCE EduBFv2 - V66 -->
 <div id="licence-ecran" style="display:none;position:fixed;inset:0;z-index:99999;background:#0a2e1a;color:#fff;padding:22px;overflow:auto;font-family:Arial">
   <div style="max-width:420px;margin:20px auto;background:#fff;color:#111;border-radius:16px;padding:22px">
