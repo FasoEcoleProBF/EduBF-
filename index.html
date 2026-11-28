@@ -4431,7 +4431,44 @@ setTimeout(function(){ try{ EDUBF_voirRegistre(); }catch(e){} }, 3000);
   degagerMenu();
 })();
 </script>
+
+<!-- PATCH V73 : LE VRAI menu du bas est #bnav, pas nav. On le degage des touches -->
+<style>
+  #bnav{
+    bottom: 0 !important;
+    height: 124px !important;
+    padding-top: 8px !important;
+    padding-bottom: 56px !important;
+    align-items: flex-start !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+  }
+  #bnav .bn{
+    padding-top: 4px !important;
+    padding-bottom: 0 !important;
+  }
+  body{ padding-bottom: 320px !important; }
+  .btn-retour-fixe{ bottom: 138px !important; }
+  .btn-haut-fixe{ bottom: 196px !important; }
+</style>
+<script>
+(function(){
+  function degagerBnav(){
+    try{
+      var b=document.getElementById('bnav');
+      if(b){
+        b.style.setProperty('height','124px','important');
+        b.style.setProperty('padding-bottom','56px','important');
+        b.style.setProperty('padding-top','8px','important');
+      }
+    }catch(e){}
+  }
+  setInterval(degagerBnav, 1500);
+  degagerBnav();
+})();
+</script>
 </body>
+
 
 
 
