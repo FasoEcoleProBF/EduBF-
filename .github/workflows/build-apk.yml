@@ -19,7 +19,7 @@ jobs:
           cp index.html EduBF/
           cp manifest.json EduBF/
           npm init -y
-          npm install @capacitor/core @capacitor/cli
+          npm install @capacitor/core @capacitor/cli @capacitor/android
       - name: Creer le projet Android
         run: |
           npx cap init EduBF com.edubf.app --web-dir=EduBF
