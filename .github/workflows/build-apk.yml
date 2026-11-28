@@ -29,7 +29,9 @@ jobs:
           cp manifest.json www/manifest.json || true
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
-
+      - name: Corriger les doublons
+        run: |
+          echo "configurations.all { exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8' }" >> android/app/build.gradle
       - name: Creer le projet Android
         run: |
           npx cap init EduBF com.fasoecolepro.edubf --web-dir=www
